@@ -1,5 +1,5 @@
 #pragma once
-#include "main.h"
+#include "custom_types.h"
 
 std::wstring s2ws(const std::string & str);
 

@@ -1,7 +1,39 @@
 #include "imgui_ext.h"
 #include "Utility.h"
 
-void ImGuiKeybind::UpdateDisplayString(const std::set<uint>& keys)
+void ImGuiKeybind::InitKeybind(const KeySequence& keys)
+{
+	UpdateDisplayString(keys);
+	LastKeyBindString.assign(DisplayKeyBindString);
+}
+
+void ImGuiKeybind::UpdateKeybind(const KeySequence& keys, bool apply)
+{
+	if (IsBeingModified)
+	{
+		ImGui::GetIO().WantCaptureKeyboard = true;
+		UpdateDisplayString(keys);
+		if (apply)
+		{
+			LastKeyBindString.assign(DisplayKeyBindString);
+			IsBeingModified = false;
+			ImGui::GetIO().WantCaptureKeyboard = false;
+			SetCallback(keys);
+		}
+	}
+}
+
+void ImGuiKeybind::CancelKeybind()
+{
+	if (IsBeingModified)
+	{
+		IsBeingModified = false;
+		ImGui::GetIO().WantCaptureKeyboard = false;
+		strcpy_s(DisplayKeyBindString, LastKeyBindString.c_str());
+	}
+}
+
+void ImGuiKeybind::UpdateDisplayString(const KeySequence& keys)
 {
 	std::string keybind = "";
 	for (const auto& k : keys)
@@ -9,20 +41,7 @@ void ImGuiKeybind::UpdateDisplayString(const std::set<uint>& keys)
 		keybind += GetKeyName(k) + std::string(" + ");
 	}
 
-	strcpy_s(DisplayString, (keybind.size() > 0 ? keybind.substr(0, keybind.size() - 3) : keybind).c_str());
-}
-
-void ImGuiKeybind::UpdateKeybind(const std::set<uint>& keys, bool apply)
-{
-	if (IsBeingModified)
-	{
-		UpdateDisplayString(keys);
-		if (apply)
-		{
-			IsBeingModified = false;
-			SetCallback(keys);
-		}
-	}
+	strcpy_s(DisplayKeyBindString, (keybind.size() > 0 ? keybind.substr(0, keybind.size() - 3) : keybind).c_str());
 }
 
 ImVec4 operator/(const ImVec4& v, float f)
@@ -49,7 +68,7 @@ void ImGuiKeybindInput(const std::string& name, ImGuiKeybind& setting)
 	else
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1));
 
-	ImGui::InputText(suffix.c_str(), setting.DisplayString, 256, ImGuiInputTextFlags_ReadOnly);
+	ImGui::InputText(suffix.c_str(), setting.DisplayKeyBindString, 256, ImGuiInputTextFlags_ReadOnly);
 
 	ImGui::PopItemWidth();
 
@@ -60,13 +79,14 @@ void ImGuiKeybindInput(const std::string& name, ImGuiKeybind& setting)
 	if (!setting.IsBeingModified && ImGui::Button(("Set" + suffix).c_str(), ImVec2(windowWidth * 0.1f, 0.f)))
 	{
 		setting.IsBeingModified = true;
-		setting.DisplayString[0] = '\0';
+		setting.DisplayKeyBindString[0] = '\0';
 	}
 	else if (setting.IsBeingModified && ImGui::Button(("Clear" + suffix).c_str(), ImVec2(windowWidth * 0.1f, 0.f)))
 	{
 		setting.IsBeingModified = false;
-		setting.DisplayString[0] = '\0';
-		setting.SetCallback(std::set<uint>());
+		setting.DisplayKeyBindString[0] = '\0';
+		setting.LastKeyBindString.clear();
+		setting.SetCallback(KeySequence());
 	}
 
 	ImGui::SameLine();

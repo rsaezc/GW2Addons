@@ -1,9 +1,9 @@
 #include "inputs.h"
-#include <list>
 #include "Utility.h"
 #include "imgui/imgui.h"
 
-std::set<uint> DownKeys;
+KeySequence DownKeys;
+std::list<EventKey> EventKeys;
 
 struct DelayedInput
 {
@@ -74,7 +74,7 @@ DelayedInput TransformVKey(uint vk, bool down, mstime t)
 
 std::list<DelayedInput> QueuedInputs;
 
-void SendKeybind(const std::set<uint>& vkeys)
+void SendKeybind(const KeySequence& vkeys)
 {
 	if (vkeys.empty())
 		return;
@@ -112,7 +112,56 @@ void SendKeybind(const std::set<uint>& vkeys)
 	}
 }
 
-void SendQueuedInputs()
+void ProcessEventKeysFromInputMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	// Generate our EventKey list for the current message
+	bool eventDown = false;
+	switch (msg)
+	{
+	case WM_SYSKEYDOWN:
+	case WM_KEYDOWN:
+		eventDown = true;
+	case WM_SYSKEYUP:
+	case WM_KEYUP:
+		if ((msg == WM_SYSKEYDOWN || msg == WM_SYSKEYUP) && wParam != VK_F10)
+		{
+			if (((lParam >> 29) & 1) == 1)
+				EventKeys.push_back({ VK_MENU, true });
+			else
+				EventKeys.push_back({ VK_MENU, false });
+		}
+		if (wParam != VK_ESCAPE)
+		{
+			EventKeys.push_back({ (uint)wParam, eventDown });
+		}
+		break;
+	case WM_MBUTTONDOWN:
+		eventDown = true;
+	case WM_MBUTTONUP:
+		EventKeys.push_back({ VK_MBUTTON, eventDown });
+		break;
+	case WM_XBUTTONDOWN:
+		eventDown = true;
+	case WM_XBUTTONUP:
+		EventKeys.push_back({ (uint)(GET_XBUTTON_WPARAM(wParam) == XBUTTON1 ? VK_XBUTTON1 : VK_XBUTTON2), eventDown });
+		break;
+	}
+
+	// Apply key events now
+	for (const auto& k : EventKeys)
+	{
+		if (k.down)
+		{
+			DownKeys.insert(k.vk);
+		}
+		else
+		{
+			DownKeys.erase(k.vk);
+		}
+	}
+}
+
+void SendQueuedInputs(HWND window)
 {
 	if (QueuedInputs.empty())
 		return;
@@ -124,7 +173,7 @@ void SendQueuedInputs()
 	if (currentTime < qi.t)
 		return;
 
-	PostMessage(GameWindow, qi.msg, qi.wParam, qi.lParam);
+	PostMessage(window, qi.msg, qi.wParam, qi.lParam);
 
 	QueuedInputs.pop_front();
 }

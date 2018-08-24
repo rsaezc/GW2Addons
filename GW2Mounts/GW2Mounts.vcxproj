@@ -70,8 +70,8 @@
       <AdditionalDependencies>d3dx9.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(TargetPath) "C:\Program Files\Guild Wars 2\bin64\d3d9_chainload.dll"
-copy /Y $(OutDir)$(TargetName).pdb "C:\Program Files\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
+      <Command>copy /Y $(TargetPath) "D:\Guild Wars 2\bin64\d3d9_chainload.dll"
+copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -95,13 +95,14 @@ copy /Y $(OutDir)$(TargetName).pdb "C:\Program Files\Guild Wars 2\bin64\d3d9_cha
       <AdditionalDependencies>d3dx9.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(TargetPath) "C:\Program Files\Guild Wars 2\bin64\d3d9_chainload.dll"
-copy /Y $(OutDir)$(TargetName).pdb "C:\Program Files\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
+      <Command>copy /Y $(TargetPath) "D:\Guild Wars 2\bin64\d3d9_chainload.dll"
+copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="ConfigurationWindow.cpp" />
     <ClCompile Include="d3dhooks.cpp" />
+    <ClCompile Include="EffectProgressTimer.cpp" />
     <ClCompile Include="imgui\examples\imgui_impl_dx9.cpp" />
     <ClCompile Include="imgui\examples\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui_ext.cpp" />
@@ -110,13 +111,17 @@ copy /Y $(OutDir)$(TargetName).pdb "C:\Program Files\Guild Wars 2\bin64\d3d9_cha
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="Mounts.cpp" />
+    <ClCompile Include="MountWheel.cpp" />
     <ClCompile Include="UnitQuad.cpp" />
     <ClCompile Include="Utility.cpp" />
     <ClCompile Include="vftable.c" />
     <ClCompile Include="xxhash\xxhash.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Config.h" />
+    <ClInclude Include="ConfigurationWindow.h" />
+    <ClInclude Include="custom_types.h" />
+    <ClInclude Include="EffectProgressTimer.h" />
     <ClInclude Include="imgui\examples\imgui_impl_dx9.h" />
     <ClInclude Include="imgui\examples\imgui_impl_win32.h" />
     <ClInclude Include="imgui\imconfig.h" />
@@ -128,6 +133,8 @@ copy /Y $(OutDir)$(TargetName).pdb "C:\Program Files\Guild Wars 2\bin64\d3d9_cha
     <ClInclude Include="imgui_ext.h" />
     <ClInclude Include="inputs.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="Mounts.h" />
+    <ClInclude Include="MountWheel.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="UnitQuad.h" />
     <ClInclude Include="simpleini\SimpleIni.h" />

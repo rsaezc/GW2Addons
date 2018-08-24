@@ -1,10 +1,11 @@
-#include "main.h"
 #include <d3d9.h>
 #include "vftable.h"
 #include "minhook/include/MinHook.h"
 #include "Utility.h"
 #include <tchar.h>
 #include "xxhash/xxhash.h"
+
+#define NULL_COALESCE(a, b) ((a) != nullptr ? (a) : (b))
 
 XXH64_hash_t PreUIVertexShaderHash = 0x1fe3c6cd77e6e9f0;
 XXH64_hash_t PreUIPixelShaderHash = 0xccc38027cdd6cd51;
@@ -283,7 +284,11 @@ D3DPRESENT_PARAMETERS SetupHookDevice(HWND &hWnd)
 
 void DeleteHookDevice(IDirect3DDevice9* pDev, HWND hWnd)
 {
-	COM_RELEASE(pDev);
+	if (pDev)
+	{
+		pDev->Release();
+		pDev = nullptr;
+	}
 
 	DestroyWindow(hWnd);
 	UnregisterClassA("DXTMP", GetModuleHandleA(NULL));

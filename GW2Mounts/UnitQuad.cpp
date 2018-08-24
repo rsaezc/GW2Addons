@@ -43,9 +43,23 @@ UnitQuad::UnitQuad(IDirect3DDevice9* device)
 
 UnitQuad::~UnitQuad()
 {
-	COM_RELEASE(_device);
-	COM_RELEASE(_vd);
-	COM_RELEASE(_buffer);
+	if (_device)
+	{
+		_device->Release();
+		_device = nullptr;
+	}
+
+	if (_vd)
+	{
+		_vd->Release();
+		_vd = nullptr;
+	}
+
+	if (_buffer)
+	{
+		_buffer->Release();
+		_buffer = nullptr;
+	}
 }
 
 const D3DVERTEXELEMENT9 * UnitQuad::def()

@@ -1,17 +1,21 @@
 #pragma once
-#include "main.h"
 #include <functional>
-#include <set>
 #include <imgui.h>
+#include "custom_types.h"
 
 struct ImGuiKeybind
 {
-	char DisplayString[256];
+	char DisplayKeyBindString[256];
+	std::string LastKeyBindString;
 	bool IsBeingModified = false;
-	std::function<void(const std::set<uint>&)> SetCallback;
+	std::function<void(const KeySequence&)> SetCallback;
 
-	void UpdateDisplayString(const std::set<uint>& keys);
-	void UpdateKeybind(const std::set<uint>& keys, bool apply);
+	void InitKeybind(const KeySequence& keys);
+	void UpdateKeybind(const KeySequence& keys, bool apply);
+	void CancelKeybind();
+
+private:
+	void UpdateDisplayString(const KeySequence& keys);
 };
 
 ImVec4 operator/(const ImVec4& v, float f);
