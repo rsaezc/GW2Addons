@@ -8,6 +8,7 @@ struct ImGuiKeybind
 	char DisplayKeyBindString[256];
 	std::string LastKeyBindString;
 	bool IsBeingModified = false;
+	bool CancelPending = false;
 	std::function<void(const KeySequence&)> SetCallback;
 
 	void InitKeybind(const KeySequence& keys);

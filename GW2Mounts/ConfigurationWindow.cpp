@@ -162,16 +162,16 @@ bool ConfigurationWindow::ProcessInputEvents(HWND hWnd, UINT msg, WPARAM wParam,
 			ret_val = true;
 		}
 		break;
-	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
 		ConfigKeybind.CancelKeybind();
 		WheelKeybind.CancelKeybind();
 		for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 		{
 			MountKeybinds[i].CancelKeybind();
 		}
-	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	case WM_MBUTTONUP:
 	case WM_XBUTTONDOWN:
@@ -209,7 +209,7 @@ bool ConfigurationWindow::ProcessInputEvents(HWND hWnd, UINT msg, WPARAM wParam,
 		}
 		else
 		{
-			if (wParam == VK_ESCAPE)
+			if ((wParam == VK_ESCAPE) && EscPressed)
 			{
 				ConfigKeybind.CancelKeybind();
 				WheelKeybind.CancelKeybind();

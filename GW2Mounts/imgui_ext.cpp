@@ -27,9 +27,8 @@ void ImGuiKeybind::CancelKeybind()
 {
 	if (IsBeingModified)
 	{
-		IsBeingModified = false;
+		CancelPending = true;
 		ImGui::GetIO().WantCaptureKeyboard = false;
-		strcpy_s(DisplayKeyBindString, LastKeyBindString.c_str());
 	}
 }
 
@@ -76,17 +75,30 @@ void ImGuiKeybindInput(const std::string& name, ImGuiKeybind& setting)
 
 	ImGui::SameLine();
 
-	if (!setting.IsBeingModified && ImGui::Button(("Set" + suffix).c_str(), ImVec2(windowWidth * 0.1f, 0.f)))
+	if (!setting.IsBeingModified)
 	{
-		setting.IsBeingModified = true;
-		setting.DisplayKeyBindString[0] = '\0';
+		if (ImGui::Button(("Set" + suffix).c_str(), ImVec2(windowWidth * 0.1f, 0.f)))
+		{
+			setting.IsBeingModified = true;
+			setting.DisplayKeyBindString[0] = '\0';
+		}
 	}
-	else if (setting.IsBeingModified && ImGui::Button(("Clear" + suffix).c_str(), ImVec2(windowWidth * 0.1f, 0.f)))
+	else
 	{
-		setting.IsBeingModified = false;
-		setting.DisplayKeyBindString[0] = '\0';
-		setting.LastKeyBindString.clear();
-		setting.SetCallback(KeySequence());
+		if (ImGui::Button(("Clear" + suffix).c_str(), ImVec2(windowWidth * 0.1f, 0.f)))
+		{
+			setting.IsBeingModified = false;
+			setting.CancelPending = false;
+			setting.DisplayKeyBindString[0] = '\0';
+			setting.LastKeyBindString.clear();
+			setting.SetCallback(KeySequence());
+		}
+		else if (setting.CancelPending) 
+		{
+			setting.IsBeingModified = false;
+			setting.CancelPending = false;
+			strcpy_s(setting.DisplayKeyBindString, setting.LastKeyBindString.c_str());
+		}
 	}
 
 	ImGui::SameLine();
