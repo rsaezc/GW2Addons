@@ -279,18 +279,25 @@ void ConfigurationWindow::Draw()
 	//Favorite mount list: get current enabled mounts
 	std::vector<const char*> FavoriteMountNames;
 	FavoriteMountNames.push_back("None");
+	std::vector<Mounts::Mount> EnabledMounts;
+	EnabledMounts.push_back(Mounts::NONE);
+	int favorite_mount = 0;
 	for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 	{
 		Mounts::Mount mount = static_cast<Mounts::Mount>(i);
 		if (MountList->IsMountEnabled(mount))
 		{
+			EnabledMounts.push_back(mount);
 			FavoriteMountNames.push_back(MountList->GetMountName(mount));
+			if (MountList->GetFavoriteMount() == mount)
+			{
+				favorite_mount = (int)EnabledMounts.size() - 1;
+			}
 		}
 	}
-	int favorite_mount = MountList->GetFavoriteMount() + 1;
 	if (ImGui::Combo("Favorite Mount", &favorite_mount, FavoriteMountNames.data(), (int)FavoriteMountNames.size()))
 	{
-		Mounts::Mount fav_mount = static_cast<Mounts::Mount>(favorite_mount - 1);
+		Mounts::Mount fav_mount = EnabledMounts.at(favorite_mount);
 		UpdateFavoriteMount(fav_mount);
 	}
 
