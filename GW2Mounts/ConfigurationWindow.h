@@ -58,7 +58,10 @@ private:
 	char ImGuiConfigIniLocation[MAX_PATH];
 
 	void Hide();
+
 	void LoadConfiguration();
+	void LoadCustomStyle();
+	void DrawKeybindInput(const std::string & name, ImGuiKeybind & setting);
 
 	// Config update events
 	void UpdateConfigKeybind(const KeySequence& val);

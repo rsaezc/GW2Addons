@@ -9,6 +9,45 @@
 #include "inputs.h"
 #include "ConfigurationWindow.h"
 
+/* Colors */
+#define FONT_COLOR					(IM_COL32(210, 208, 191, 255))
+#define BORDER_COLOR				FONT_COLOR
+#define WINDOW_BG_COLOR				(IM_COL32(87, 59, 31, 200))
+#define TITLE_BG_COLOR				(IM_COL32(20, 20, 20, 255))
+#define TITLE_ACTIVE_COLOR			(IM_COL32(40, 40, 40, 255))
+#define HEADER_BG_COLOR				TITLE_BG_COLOR
+#define HEADER_HOVER_COLOR			(IM_COL32(50, 50, 50, 255))
+#define WIDGET_BG_COLOR				HEADER_BG_COLOR
+#define WIDGET_HOVER_COLOR			HEADER_HOVER_COLOR
+#define INPUT_TEXT_BG_COLOR			(IM_COL32(255, 255, 255, 50))
+#define INPUT_TEXT_ACTIVE_COLOR		(IM_COL32(20, 20, 20, 50))
+#define BUTTON_BG_COLOR				FONT_COLOR
+#define BUTTON_HOVER_COLOR			(IM_COL32(240, 238, 211, 255))
+#define BUTTON_TEXT_COLOR			HEADER_BG_COLOR
+#define CLOSE_BUTTON_HOVER_COLOR	(IM_COL32(70, 70, 70, 255))
+#define SLIDER_GRAB_COLOR			BUTTON_BG_COLOR
+#define SLIDER_GRAB_ACTIVE_COLOR	BUTTON_HOVER_COLOR
+#define COMBO_ARROW_COLOR			WIDGET_BG_COLOR
+#define COMBO_ARROW_HOVER_COLOR		WIDGET_HOVER_COLOR
+#define CHECKBOX_TICK_COLOR			BUTTON_HOVER_COLOR
+#define RESIZE_GRIP_COLOR			BUTTON_BG_COLOR
+#define RESIZE_GRIP_HOVER_COLOR		BUTTON_HOVER_COLOR
+
+/* Style */
+#define WINDOW_TITLE_HEIGHT			(ImVec2(10.0f, 10.0f))
+#define	WINDOW_RECT_BORDER			(0.0f)
+#define WIDGET_NO_BORDER			(0.0f)
+#define WIDGET_WITH_BORDER			(1.0f)
+#define V_SPACE_BETWEEN_GROUPS		(5.0f)
+#define V_SPACE_INSIDE_GROUPS		(3.0f)
+
+/* Sizes */
+#define WINDOW_MIN_SIZE				(ImVec2(388.0f, 415.0f))
+#define INPUT_TEXT_WIDTH			(ImGui::GetWindowWidth() * 0.38f)
+#define BUTTON_WIDTH				(ImGui::GetWindowWidth() * 0.10f)
+#define COMBO_WIDTH					(ImGui::GetWindowWidth() * 0.48f)
+#define SLIDER_WIDTH				COMBO_WIDTH
+
 ConfigurationWindow::ConfigurationWindow(MountWheel* wheel_window, Mounts* mount_list)
 {
 	if (!wheel_window || !mount_list)
@@ -248,64 +287,122 @@ void ConfigurationWindow::Draw()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
+	LoadCustomStyle();
+
+	/* Center window at start-up and set minimum size */
+	ImGuiCenterWindowOnScreen();
+	ImGuiSetMinimumWindowSize(WINDOW_MIN_SIZE);
+
 	bool window_visible = true;
-	ImGui::Begin("Overlay Options Menu", &window_visible);
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar
+									| ImGuiWindowFlags_NoScrollWithMouse
+									| ImGuiWindowFlags_NoCollapse;
+	/* Title height */
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, WINDOW_TITLE_HEIGHT);
+	/* Button X */
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, CLOSE_BUTTON_HOVER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, CLOSE_BUTTON_HOVER_COLOR);
+	ImGui::Begin("Overlay Options Menu", &window_visible, window_flags);
 	if (!window_visible)
 	{
 		Hide();
 	}
+	ImGui::PopStyleColor(2);
+	ImGui::PopStyleVar();
 
-	ImGuiKeybindInput("Option menu Keybind", ConfigKeybind);
+	ImGui::Indent();
+    DrawKeybindInput("Option menu Keybind:", ConfigKeybind);
+	ImGui::Unindent();
+	
+	ImGuiAddVerticalSpace(V_SPACE_BETWEEN_GROUPS);
 
-	ImGui::Separator();
-	ImGui::Text("Overlay options"); 
-	ImGuiKeybindInput("Overlay Keybind", WheelKeybind);
-
-	float wheel_scale = WheelWindow->GetWheelScale();
-	if (ImGui::SliderFloat("Overlay Scale", &wheel_scale, 0.f, 4.f))
+	if (ImGui::CollapsingHeader("Overlay options", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		UpdateWheelScale(wheel_scale);
-	}
+		ImGuiAddVerticalSpace(V_SPACE_INSIDE_GROUPS);
 
-	bool action_mode = WheelWindow->isActionModeEnabled();
-	if (ImGui::Checkbox("Overlay in action mode", &action_mode))
-	{
-		UpdateWheelActionMode(action_mode);
-	}
+		ImGui::Indent();
 
-	ImGui::Separator();
-	ImGui::Text("Mount options");
+		DrawKeybindInput("Overlay Keybind", WheelKeybind);
 
-	//Favorite mount list: get current enabled mounts
-	std::vector<const char*> FavoriteMountNames;
-	FavoriteMountNames.push_back("None");
-	std::vector<Mounts::Mount> EnabledMounts;
-	EnabledMounts.push_back(Mounts::NONE);
-	int favorite_mount = 0;
-	for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
-	{
-		Mounts::Mount mount = static_cast<Mounts::Mount>(i);
-		if (MountList->IsMountEnabled(mount))
+		ImGuiAddVerticalSpace(V_SPACE_INSIDE_GROUPS);
+
+		ImGui::Text("Overlay Scale:");
+		float item_width = SLIDER_WIDTH;
+		ImGuiSetNextRightAlignWithIndent(item_width);
+		ImGui::PushItemWidth(item_width);
+		float wheel_scale = WheelWindow->GetWheelScale();
+		if (ImGui::SliderFloat("", &wheel_scale, 0.f, 4.f))
 		{
-			EnabledMounts.push_back(mount);
-			FavoriteMountNames.push_back(MountList->GetMountName(mount));
-			if (MountList->GetFavoriteMount() == mount)
+			UpdateWheelScale(wheel_scale);
+		}
+		ImGui::PopItemWidth();
+
+		ImGuiAddVerticalSpace(V_SPACE_INSIDE_GROUPS);
+
+		bool action_mode = WheelWindow->isActionModeEnabled();
+		if (ImGui::Checkbox("Overlay in action mode.", &action_mode))
+		{
+			UpdateWheelActionMode(action_mode);
+		}
+
+		ImGui::Unindent();
+	}
+
+	ImGuiAddVerticalSpace(V_SPACE_BETWEEN_GROUPS);
+
+	if (ImGui::CollapsingHeader("Mount options", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGuiAddVerticalSpace(V_SPACE_INSIDE_GROUPS);
+
+		ImGui::Indent();
+
+		ImGui::Text("Favorite Mount:");
+		float item_width = COMBO_WIDTH;
+		ImGuiSetNextRightAlignWithIndent(item_width);
+		ImGui::PushItemWidth(item_width);
+
+		/* Favorite mount list: get current enabled mounts */
+		std::vector<const char*> FavoriteMountNames;
+		FavoriteMountNames.push_back("None");
+		std::vector<Mounts::Mount> EnabledMounts;
+		EnabledMounts.push_back(Mounts::NONE);
+		int favorite_mount = 0;
+		for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
+		{
+			Mounts::Mount mount = static_cast<Mounts::Mount>(i);
+			if (MountList->IsMountEnabled(mount))
 			{
-				favorite_mount = (int)EnabledMounts.size() - 1;
+				EnabledMounts.push_back(mount);
+				FavoriteMountNames.push_back(MountList->GetMountName(mount));
+				if (MountList->GetFavoriteMount() == mount)
+				{
+					favorite_mount = (int)EnabledMounts.size() - 1;
+				}
 			}
 		}
-	}
-	if (ImGui::Combo("Favorite Mount", &favorite_mount, FavoriteMountNames.data(), (int)FavoriteMountNames.size()))
-	{
-		Mounts::Mount fav_mount = EnabledMounts.at(favorite_mount);
-		UpdateFavoriteMount(fav_mount);
-	}
+		/* Arrow button color */
+		ImGui::PushStyleColor(ImGuiCol_Button, COMBO_ARROW_COLOR);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COMBO_ARROW_HOVER_COLOR);
+		if (ImGui::Combo("", &favorite_mount, FavoriteMountNames.data(), (int)FavoriteMountNames.size()))
+		{
+			Mounts::Mount fav_mount = EnabledMounts.at(favorite_mount);
+			UpdateFavoriteMount(fav_mount);
+		}
+		ImGui::PopStyleColor(2);
+		ImGui::PopItemWidth();
+		
+		ImGuiAddVerticalSpace(V_SPACE_INSIDE_GROUPS);
 
-	ImGui::Text("Keybinds (same as game keybinds)");
-	for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
-	{
-		Mounts::Mount mount = static_cast<Mounts::Mount>(i);
-		ImGuiKeybindInput(MountList->GetMountName(mount), MountKeybinds[i]);
+		ImGui::Text("Keybinds (same as game keybinds):");
+		ImGui::Indent();
+		for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
+		{
+			Mounts::Mount mount = static_cast<Mounts::Mount>(i);
+			DrawKeybindInput(MountList->GetMountName(mount), MountKeybinds[i]);
+		}
+		ImGui::Unindent();
+
+		ImGui::Unindent();
 	}
 
 	ImGui::End();
@@ -369,6 +466,93 @@ void ConfigurationWindow::LoadConfiguration()
 	Mounts::Mount favorite_mount = MountList->GetFavoriteMount();
 	favorite_mount = static_cast<Mounts::Mount>(ConfigIniHandler.GetLongValue("General", "favorite_mount", (int)favorite_mount));
 	MountList->SetFavoriteMount(favorite_mount);
+}
+
+void ConfigurationWindow::LoadCustomStyle()
+{
+	/* Set window style */
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, WINDOW_RECT_BORDER);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, WIDGET_WITH_BORDER);
+	/* Set common colors */
+	ImGui::PushStyleColor(ImGuiCol_Text, FONT_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_Border, BORDER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, WINDOW_BG_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_TitleBg, TITLE_BG_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, TITLE_ACTIVE_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_Header, HEADER_BG_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_HeaderActive, HEADER_HOVER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, HEADER_HOVER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, WIDGET_BG_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, WIDGET_HOVER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, WIDGET_HOVER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_Button, BUTTON_BG_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, BUTTON_HOVER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, BUTTON_HOVER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_SliderGrab, SLIDER_GRAB_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, SLIDER_GRAB_ACTIVE_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_CheckMark, CHECKBOX_TICK_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_ResizeGrip, RESIZE_GRIP_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_ResizeGripHovered, RESIZE_GRIP_HOVER_COLOR);
+	ImGui::PushStyleColor(ImGuiCol_ResizeGripActive, RESIZE_GRIP_HOVER_COLOR);
+}
+
+void ConfigurationWindow::DrawKeybindInput(const std::string& name, ImGuiKeybind& setting)
+{
+	std::string suffix = "##" + name;
+
+	float input_text_width = INPUT_TEXT_WIDTH;
+	float button_width = BUTTON_WIDTH;
+
+	ImGui::Text(name.c_str());
+
+	ImGuiSetNextRightAlignWithIndent(input_text_width + button_width);
+
+	ImGui::PushItemWidth(input_text_width);
+	if (setting.IsBeingModified)
+	{
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, INPUT_TEXT_ACTIVE_COLOR);
+	}
+	else
+	{
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, INPUT_TEXT_BG_COLOR);
+	}
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, WIDGET_NO_BORDER);
+
+	ImGui::InputText(suffix.c_str(), setting.DisplayKeyBindString, 256, ImGuiInputTextFlags_ReadOnly);
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor();
+	ImGui::PopItemWidth();
+
+	ImGuiSetNextRightAlignWithIndent(button_width);
+
+	ImGui::PushStyleColor(ImGuiCol_Text, BUTTON_TEXT_COLOR);
+	if (!setting.IsBeingModified)
+	{
+		if (ImGui::Button(("Set" + suffix).c_str(), ImVec2(button_width, 0.f)))
+		{
+			setting.IsBeingModified = true;
+			setting.DisplayKeyBindString[0] = '\0';
+		}
+	}
+	else
+	{
+		if (ImGui::Button(("Clear" + suffix).c_str(), ImVec2(button_width, 0.f)))
+		{
+			setting.IsBeingModified = false;
+			setting.CancelPending = false;
+			setting.DisplayKeyBindString[0] = '\0';
+			setting.LastKeyBindString.clear();
+			setting.SetCallback(KeySequence());
+		}
+		else if (setting.CancelPending)
+		{
+			setting.IsBeingModified = false;
+			setting.CancelPending = false;
+			strcpy_s(setting.DisplayKeyBindString, setting.LastKeyBindString.c_str());
+		}
+	}
+	ImGui::PopStyleColor();
 }
 
 void ConfigurationWindow::UpdateConfigKeybind(const KeySequence& val)

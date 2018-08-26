@@ -172,12 +172,16 @@ HRESULT WINAPI CreateDevice_hook(IDirect3D9* _this, UINT Adapter, D3DDEVTYPE Dev
 
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.Reset, vftd.Reset), (LPVOID)&Reset_hook, (LPVOID*)&Reset_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.Present, vftd.Present), (LPVOID)&Present_hook, (LPVOID*)&Present_real);
-	//MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.Release, vftd.Release), (LPVOID)&Release_hook, (LPVOID*)&Release_real);
-	//MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.AddRef, vftd.AddRef), (LPVOID)&AddRef_hook, (LPVOID*)&AddRef_real);
+#if 0 /* Disabled */
+	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.Release, vftd.Release), (LPVOID)&Release_hook, (LPVOID*)&Release_real);
+	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.AddRef, vftd.AddRef), (LPVOID)&AddRef_hook, (LPVOID*)&AddRef_real);
+#endif
+#ifdef OVERLAY_BEHIND_GAME_UI
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.CreateVertexShader, vftd.CreateVertexShader), (LPVOID)&CreateVertexShader_hook, (LPVOID*)&CreateVertexShader_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.SetVertexShader, vftd.SetVertexShader), (LPVOID)&SetVertexShader_hook, (LPVOID*)&SetVertexShader_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.CreatePixelShader, vftd.CreatePixelShader), (LPVOID)&CreatePixelShader_hook, (LPVOID*)&CreatePixelShader_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.SetPixelShader, vftd.SetPixelShader), (LPVOID)&SetPixelShader_hook, (LPVOID*)&SetPixelShader_real);
+#endif
 	MH_EnableHook(MH_ALL_HOOKS);
 
 	PostCreateDevice(temp_device, pPresentationParameters);
@@ -203,12 +207,16 @@ HRESULT WINAPI CreateDeviceEx_hook(IDirect3D9Ex* _this, UINT Adapter, D3DDEVTYPE
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.Present, vftd.Present), (LPVOID)&Present_hook, (LPVOID*)&Present_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.ResetEx, vftd.ResetEx), (LPVOID)&ResetEx_hook, (LPVOID*)&ResetEx_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.PresentEx, vftd.PresentEx), (LPVOID)&PresentEx_hook, (LPVOID*)&PresentEx_real);
-	//MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.Release, vftd.Release), (LPVOID)&Release_hook, (LPVOID*)&Release_real);
-	//MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.AddRef, vftd.AddRef), (LPVOID)&AddRef_hook, (LPVOID*)&AddRef_real);
+#if 0 /* Disabled */
+	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.Release, vftd.Release), (LPVOID)&Release_hook, (LPVOID*)&Release_real);
+	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.AddRef, vftd.AddRef), (LPVOID)&AddRef_hook, (LPVOID*)&AddRef_real);
+#endif
+#ifdef OVERLAY_BEHIND_GAME_UI
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.CreateVertexShader, vftd.CreateVertexShader), (LPVOID)&CreateVertexShader_hook, (LPVOID*)&CreateVertexShader_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.SetVertexShader, vftd.SetVertexShader), (LPVOID)&SetVertexShader_hook, (LPVOID*)&SetVertexShader_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.CreatePixelShader, vftd.CreatePixelShader), (LPVOID)&CreatePixelShader_hook, (LPVOID*)&CreatePixelShader_real);
 	MH_CreateHook(NULL_COALESCE(OriginalDeviceVFTable.SetPixelShader, vftd.SetPixelShader), (LPVOID)&SetPixelShader_hook, (LPVOID*)&SetPixelShader_real);
+#endif
 	MH_EnableHook(MH_ALL_HOOKS);
 
 	PostCreateDevice(temp_device, pPresentationParameters);

@@ -3,6 +3,20 @@
 #include <imgui.h>
 #include "custom_types.h"
 
+#define ImGuiAddVerticalSpace(v_space) (ImGui::Dummy(ImVec2(0.0f, (float)(v_space))))
+
+#define ImGuiCenterWindowOnScreen() do {\
+									ImGuiIO& io = ImGui::GetIO();\
+									ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f,\
+									io.DisplaySize.y * 0.5f), ImGuiCond_Once, ImVec2(0.5f, 0.5f));\
+								    } while(0)
+
+#define ImGuiSetMinimumWindowSize(min_size)	(ImGui::SetNextWindowSizeConstraints((min_size),\
+											 ImVec2(FLT_MAX, FLT_MAX)))
+
+#define ImGuiSetNextRightAlignWithIndent(widget_size) (ImGui::SameLine((ImGui::GetWindowWidth()\
+													   - (widget_size)) - ImGui::GetStyle().IndentSpacing))
+
 struct ImGuiKeybind
 {
 	char DisplayKeyBindString[256];
@@ -18,6 +32,3 @@ struct ImGuiKeybind
 private:
 	void UpdateDisplayString(const KeySequence& keys);
 };
-
-ImVec4 operator/(const ImVec4& v, float f);
-void ImGuiKeybindInput(const std::string& name, ImGuiKeybind& setting);
