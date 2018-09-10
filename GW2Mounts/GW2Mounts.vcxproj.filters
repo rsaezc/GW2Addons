@@ -150,6 +150,9 @@
     <None Include="Shader.cso">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="rgb2hsl.fxh">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader.fx">

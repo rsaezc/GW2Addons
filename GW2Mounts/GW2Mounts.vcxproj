@@ -144,6 +144,7 @@ copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</C
   </ItemGroup>
   <ItemGroup>
     <None Include="main.def" />
+    <None Include="rgb2hsl.fxh" />
     <None Include="rt_rcdat.bin" />
     <None Include="Shader.cso">
       <FileType>Document</FileType>

@@ -14,11 +14,6 @@ void EffectProgressTimer::SetEffectDuration(uint milliseconds)
 	EffectDuration = milliseconds;
 }
 
-void EffectProgressTimer::SetEffectSteps(uint steps)
-{
-	EffectSteps = steps;
-}
-
 void EffectProgressTimer::Start()
 {
 	StartTime = timeInMS();
@@ -34,7 +29,7 @@ float EffectProgressTimer::GetProgress()
 {
 	if (Enabled)
 	{
-		float progress = (timeInMS() - StartTime) * (float)EffectSteps / EffectDuration;
+		float progress = (timeInMS() - StartTime) / (float)EffectDuration;
 		if (progress < 1.f)
 		{
 			return progress;

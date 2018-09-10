@@ -4,8 +4,7 @@
 #define SQRT2 1.4142136f
 #define ONE_OVER_SQRT2 0.707107f
 #include "perlin.hlsl"
-
-shared float4 g_fScreenSize;
+#include "rgb2hsl.fxh"
 
 struct VS_SCREEN
 {
@@ -26,12 +25,25 @@ sampler_state
     AddressV = CLAMP;
 };
 
-texture texBgImage;
+texture texMountLogo;
 
-sampler2D texBgImageSampler =
+sampler2D texMountLogoSampler =
 sampler_state
 {
-    texture = <texBgImage>;
+	texture = <texMountLogo>;
+	MipFilter = LINEAR;
+	MinFilter = LINEAR;
+	MagFilter = LINEAR;
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+};
+
+texture texBackground;
+
+sampler2D texBackgroundSampler =
+sampler_state
+{
+    texture = <texBackground>;
     MipFilter = LINEAR;
     MinFilter = LINEAR;
     MagFilter = LINEAR;
@@ -39,25 +51,26 @@ sampler_state
     AddressV = CLAMP;
 };
 
-float4 g_vSpriteDimensions, g_vScreenSize;
+texture texCursor;
+
+sampler2D texCursorSampler =
+sampler_state
+{
+	texture = <texCursor>;
+	MipFilter = LINEAR;
+	MinFilter = LINEAR;
+	MagFilter = LINEAR;
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+};
+
+float4 g_vSpriteDimensions;
 float g_fFadeInProgress;
 float g_fTimer;
 float g_fHoverProgress;
-int3 g_iMountID;
-int g_iMountCount;
-float g_fDeadZoneScale;
 bool g_bMountHovered;
-int g_iMountHovered;
+uint g_iMountHovered;
 float4 g_vColor;
-bool g_bCenterGlow;
-
-float2 makeSmoothRandom(float2 uv, float4 scales, float4 timeScales)
-{
-	float smoothrandom1 = sin(scales.x * uv.x + g_fTimer * timeScales.x) + sin(scales.y * uv.y + g_fTimer * timeScales.y);
-	float smoothrandom2 = sin(scales.z * uv.x + g_fTimer * timeScales.z) + sin(scales.w * uv.y + g_fTimer * timeScales.w);
-
-	return float2(smoothrandom1, smoothrandom2);
-}
 
 VS_SCREEN Default_VS(in float2 UV : TEXCOORD0)
 {
@@ -72,56 +85,13 @@ VS_SCREEN Default_VS(in float2 UV : TEXCOORD0)
     return Out;
 }
 
-float4 BgImage_PS(VS_SCREEN In) : COLOR0
+float4 Background_PS(VS_SCREEN In) : COLOR0
 {
-	float2 coords = 3 * (In.UV - 0.5f);
-	coords *= -1;
-	float2 coordsPolar = float2(length(coords), fmod(atan2(coords.y, coords.x) + 1.5f * PI, 2 * PI));
-		
-	float mountAngle = 2 * PI / g_iMountCount;
-	float localCoordAngle = fmod(coordsPolar.y / mountAngle + 0.5f, 1.f);
-	int localMountId = (int)(round(coordsPolar.y / mountAngle)) % g_iMountCount;
-		
-	float2 smoothrandom = float2(snoise(3 * In.UV * cos(0.1f * g_fTimer) + g_fTimer * 0.37f), snoise(5 * In.UV * sin(0.13f * g_fTimer) + g_fTimer * 0.48f));
-
-	float4 color = tex2D(texBgImageSampler, In.UV + smoothrandom * 0.003f);
-	color.rgb *= lerp(0.9f, 1.3f, saturate((4 + smoothrandom.x + smoothrandom.y) / 8));
-	color.rgb *= lerp(0.5f, 1.f, localMountId == g_iMountHovered ? g_fHoverProgress : 0.f);
-	float luma = dot(color.rgb, float3(0.2126, 0.7152, 0.0722));
-
-	float edge_mask = lerp(1.f, 0.f, smoothstep(0.5f, 1.f, coordsPolar.x * (1 - luma * 0.2f)));
-	float center_mask = lerp(0.f, 1.f, smoothstep(g_fDeadZoneScale - 0.025f, g_fDeadZoneScale + 0.025f, coordsPolar.x * (1 - luma * 0.2f)));
-	
-	float border_mask = 1.f;
-	if(localMountId != g_iMountHovered || g_fHoverProgress < 1)
-	{
-		float min_thickness = 0.003f / (0.001f + coordsPolar.x);
-		float max_thickness = 0.005f / (0.001f + coordsPolar.x);
-	
-		if(g_iMountCount > 1)
-		{
-			border_mask *= lerp(2.f, 1.f, smoothstep(min_thickness, max_thickness, localCoordAngle));
-			border_mask *= lerp(1.f, 2.f, smoothstep(1 - max_thickness, 1 - min_thickness, localCoordAngle));
-		}
-	}
-
-	if(localMountId == g_iMountHovered && g_fHoverProgress < 1)
-		border_mask = lerp(border_mask, 1.f, g_fHoverProgress);
-
-	if(g_bCenterGlow)
-	{
-		if(localMountId == g_iMountHovered)
-			border_mask *= 1 - g_fHoverProgress;
-		center_mask = lerp(center_mask, 1.f, g_fHoverProgress);
-	}
-		
-	border_mask *= lerp(2.f, 1.f, smoothstep(g_fDeadZoneScale, g_fDeadZoneScale + 0.05f, coordsPolar.x));
-	border_mask *= lerp(1.5f, 1.f, smoothstep(g_fDeadZoneScale, min(0.5f, g_fDeadZoneScale * 4), coordsPolar.x));
-
-	return color * saturate(edge_mask * center_mask) * clamp(border_mask, 1.f, 2.f) * clamp(luma, 0.8f, 1.2f) * g_fFadeInProgress;
+	float4 color = tex2D(texBackgroundSampler, In.UV);
+	return color * g_fFadeInProgress;
 }
 
-technique BgImage
+technique Background
 {
 	pass P0
 	{
@@ -131,40 +101,69 @@ technique BgImage
 		AlphaTestEnable = false;
 		AlphaBlendEnable = true;
 
-		SrcBlend = One;
+		SrcBlend = SrcAlpha;
 		DestBlend = InvSrcAlpha;
 		BlendOp = Add;
 
 		VertexShader = compile vs_3_0 Default_VS();
-		PixelShader = compile ps_3_0 BgImage_PS();
+		PixelShader = compile ps_3_0 Background_PS();
 	}
 }
 
 float4 MountImage_PS(VS_SCREEN In) : COLOR0
 {
-	float mask = 1.f - tex2D(texMountImageSampler, In.UV).r;
-	float shadow = 1.f - tex2D(texMountImageSampler, In.UV + 0.01f).r;
-	
-	float luma = dot(g_vColor.rgb, float3(0.2126, 0.7152, 0.0722));
+    float4 color = tex2D(texMountImageSampler, In.UV);
 
-	float3 faded_color = lerp(g_vColor.rgb, luma, 0.33f);
-
-	float3 color = faded_color;
-	float3 glow = 0;
-	if(g_bMountHovered)
+	if (!g_bMountHovered)
 	{
-		color = lerp(faded_color, g_vColor.rgb, g_fHoverProgress);
-
-		float glow_mask = 0;
-		glow_mask += 1.f - tex2D(texMountImageSampler, In.UV + float2(0.01f, 0.01f)).r;
-		glow_mask += 1.f - tex2D(texMountImageSampler, In.UV + float2(-0.01f, 0.01f)).r;
-		glow_mask += 1.f - tex2D(texMountImageSampler, In.UV + float2(0.01f, -0.01f)).r;
-		glow_mask += 1.f - tex2D(texMountImageSampler, In.UV + float2(-0.01f, -0.01f)).r;
-
-		glow = g_vColor.rgb * (glow_mask / 4) * g_fHoverProgress * 0.5f * (0.5f + 0.5f * snoise(In.UV * 3.18f + 0.15f * float2(cos(g_fTimer * 3), sin(g_fTimer * 2))));
+		color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11));
+	}
+	else
+	{
+		switch (g_iMountHovered)
+		{
+		case 0:
+			if (distance(In.UV, float2(0.5, 1)) > g_fHoverProgress)
+			{
+				color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11));
+			}
+			break;
+		case 1:
+			if (distance(In.UV, float2(0, 1)) > g_fHoverProgress)
+			{
+				color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11));
+			}
+			break;
+		case 2:
+			if (distance(In.UV, float2(0, 0)) > g_fHoverProgress)
+			{
+				color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11));
+			}
+			break;
+		case 3:
+			if (distance(In.UV, float2(0.5, 0)) > g_fHoverProgress)
+			{
+				color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11));
+			}
+			break;
+		case 4:
+			if (distance(In.UV, float2(1, 0)) > g_fHoverProgress)
+			{
+				color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11));
+			}
+			break;
+		case 5:
+			if (distance(In.UV, float2(1, 1)) > g_fHoverProgress)
+			{
+				color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11));
+			}
+			break;
+		default:
+			break;
+		}
 	}
 
-	return float4(color * mask + glow, g_vColor.a * max(mask, shadow)) * g_fFadeInProgress;
+	return color * g_fFadeInProgress;
 }
 
 technique MountImage
@@ -177,7 +176,7 @@ technique MountImage
 		AlphaTestEnable = false;
 		AlphaBlendEnable = true;
 
-		SrcBlend = One;
+		SrcBlend = SrcAlpha;
 		DestBlend = InvSrcAlpha;
 		BlendOp = Add;
 
@@ -186,16 +185,54 @@ technique MountImage
 	}
 }
 
+float4 MountLogo_PS(VS_SCREEN In) : COLOR0
+{
+	float mask = 1.f - tex2D(texMountLogoSampler, In.UV).r;
+	float shadow = 1.f - tex2D(texMountLogoSampler, In.UV + 0.01f).r;
+	
+	float luma = dot(g_vColor.rgb, float3(0.2126, 0.7152, 0.0722));
+
+	float3 faded_color = lerp(g_vColor.rgb, luma, 0.33f);
+	float3 color = lerp(faded_color, g_vColor.rgb, g_fHoverProgress);
+	float glow_mask = 0;
+	glow_mask += 1.f - tex2D(texMountLogoSampler, In.UV + float2(0.01f, 0.01f)).r;
+	glow_mask += 1.f - tex2D(texMountLogoSampler, In.UV + float2(-0.01f, 0.01f)).r;
+	glow_mask += 1.f - tex2D(texMountLogoSampler, In.UV + float2(0.01f, -0.01f)).r;
+	glow_mask += 1.f - tex2D(texMountLogoSampler, In.UV + float2(-0.01f, -0.01f)).r;
+	float3 glow = g_vColor.rgb * (glow_mask / 4) * g_fHoverProgress * 0.5f * (0.5f + 0.5f * snoise(In.UV * 3.18f + 0.15f * float2(cos(g_fTimer * 3), sin(g_fTimer * 2))));
+	return float4(color * mask + glow, g_vColor.a * max(mask, shadow)) * g_fFadeInProgress;
+}
+
+technique MountLogo
+{
+	pass P0
+	{
+		ZEnable = false;
+		ZWriteEnable = false;
+		CullMode = None;
+		AlphaTestEnable = false;
+		AlphaBlendEnable = true;
+
+		SrcBlend = One;
+		DestBlend = InvSrcAlpha;
+		BlendOp = Add;
+
+		VertexShader = compile vs_3_0 Default_VS();
+		PixelShader = compile ps_3_0 MountLogo_PS();
+	}
+}
+
 float4 Cursor_PS(VS_SCREEN In) : COLOR0
 {
-	float2 smoothrandom = makeSmoothRandom(In.UV, float4(15, 18, 18, 15), float4(2.4, 3.1, 2.9, 4.7));
+	float4 color = tex2D(texCursorSampler, In.UV);
+	if (g_bMountHovered)
+	{
+		float3 hsl_color = RGBtoHSL(color.rgb);
+		hsl_color.x += 0.17f; /* Convert yellow tones to green adding 60º (60/360=0.17) */
+		color.rgb = HSLtoRGB(hsl_color);
+	}
 
-	float4 baseImage = tex2D(texBgImageSampler, In.UV + smoothrandom * 0.003f);
-	float radius = length(In.UV * 2 - 1);
-	baseImage *= 1.25f * pow(1.f - smoothstep(0.f, 1.f, radius), 4.f);
-	baseImage *= lerp(0.8f, 1.5f, saturate((4 + smoothrandom.x + smoothrandom.y) / 8));
-
-	return baseImage;
+	return color * g_fFadeInProgress;
 }
 
 technique Cursor
@@ -208,8 +245,8 @@ technique Cursor
 		AlphaTestEnable = false;
 		AlphaBlendEnable = true;
 
-		SrcBlend = One;
-		DestBlend = One;
+		SrcBlend = SrcAlpha;
+		DestBlend = InvSrcAlpha;
 		BlendOp = Add;
 
 		VertexShader = compile vs_3_0 Default_VS();

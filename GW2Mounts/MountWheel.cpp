@@ -5,6 +5,26 @@
 #include "inputs.h"
 #include "MountWheel.h"
 
+#define REF_SCREEN_WIDTH		(1920.0f)
+#define REF_SCREEN_HEIGHT		(1080.0f)
+
+#define TEX_BACKGROUND_WIDTH	(1024.0f/REF_SCREEN_WIDTH)
+#define TEX_BACKGROUND_HEIGHT	(1024.0f/REF_SCREEN_HEIGHT)
+
+#define WHEEL_SIZE				(870.0f)
+#define WHEEL_RADIUS			(0.5f * WHEEL_SIZE/REF_SCREEN_WIDTH)
+#define MIDDLE_CIRCLE_SIZE		(250.0f)
+#define MIDDLE_CIRCLE_RADIUS	(0.5f * MIDDLE_CIRCLE_SIZE/REF_SCREEN_WIDTH)	
+
+#define TEX_MOUNT_WIDTH			(512.0f/REF_SCREEN_WIDTH)
+#define TEX_MOUNT_HEIGHT		(512.0f/REF_SCREEN_HEIGHT)
+
+#define TEX_LOGO_WIDTH			((MIDDLE_CIRCLE_SIZE - 80.0f)/REF_SCREEN_WIDTH)
+#define TEX_LOGO_HEIGHT			((MIDDLE_CIRCLE_SIZE - 80.0f)/REF_SCREEN_HEIGHT)
+
+#define TEX_CURSOR_WIDTH		(32.0f/REF_SCREEN_WIDTH)
+#define TEX_CURSOR_HEIGHT		(32.0f/REF_SCREEN_HEIGHT)
+
 #define SQUARE(x) ((x) * (x))
 
 MountWheel::MountWheel(Mounts *mount_list)
@@ -14,10 +34,8 @@ MountWheel::MountWheel(Mounts *mount_list)
 		throw std::invalid_argument("Null pointer");
 	}
 	MountList = mount_list;
-	WheelFadeInEffect.SetEffectDuration(1000);
-	WheelFadeInEffect.SetEffectSteps(6);
-	MountHoverEffect.SetEffectDuration(1000);
-	MountHoverEffect.SetEffectSteps(6);
+	WheelFadeInEffect.SetEffectDuration(300);
+	MountHoverEffect.SetEffectDuration(500);
 }
 
 MountWheel::~MountWheel()
@@ -148,6 +166,11 @@ void MountWheel::ReleaseResources()
 		MountList->UnloadTextures();
 		BackgroundTexture->Release();
 		BackgroundTexture = nullptr;
+		if (ActionCursorTexture)
+		{
+			ActionCursorTexture->Release();
+			ActionCursorTexture = nullptr;
+		}
 		MainEffect->Release();
 		MainEffect = nullptr;
 		Device = nullptr;
@@ -321,19 +344,19 @@ void MountWheel::Draw()
 	D3DXVECTOR4 baseSpriteDimensions;
 	baseSpriteDimensions.x = WheelPosition.x;
 	baseSpriteDimensions.y = WheelPosition.y;
-	baseSpriteDimensions.z = WheelScale * 0.5f * screenSize.y * screenSize.z;
-	baseSpriteDimensions.w = WheelScale * 0.5f;
+	baseSpriteDimensions.z = WheelScale;
+	baseSpriteDimensions.w = WheelScale;
 
-	MainEffect->SetTechnique("BgImage");
-	MainEffect->SetTexture("texBgImage", BackgroundTexture);
-	MainEffect->SetVector("g_vSpriteDimensions", &baseSpriteDimensions);
+	MainEffect->SetTechnique("Background");
+	MainEffect->SetTexture("texBackground", BackgroundTexture);
+	D3DXVECTOR4 background_dimensions = baseSpriteDimensions;
+	background_dimensions.z *= TEX_BACKGROUND_WIDTH;
+	background_dimensions.w *= TEX_BACKGROUND_HEIGHT;
+	MainEffect->SetVector("g_vSpriteDimensions", &background_dimensions);
 	MainEffect->SetFloat("g_fFadeInProgress", WheelFadeInEffect.GetProgress());
 	MainEffect->SetFloat("g_fHoverProgress", MountHoverEffect.GetProgress());
 	MainEffect->SetFloat("g_fTimer", fmod(timeInMS() / 1010.f, 55000.f));
-	MainEffect->SetFloat("g_fDeadZoneScale", 0.2f);
-	MainEffect->SetInt("g_iMountCount", Mounts::NUMBER_MOUNTS);
-	MainEffect->SetInt("g_iMountHovered", CurrentMountHovered);
-	MainEffect->SetBool("g_bCenterGlow", (CurrentMountHovered == Mounts::NONE));
+
 	MainEffect->Begin(&passes, 0);
 	MainEffect->BeginPass(0);
 	Quad->Draw();
@@ -341,39 +364,24 @@ void MountWheel::Draw()
 	MainEffect->End();
 
 	MainEffect->SetTechnique("MountImage");
-	MainEffect->SetTexture("texBgImage", BackgroundTexture);
-	MainEffect->SetVector("g_vScreenSize", &screenSize);
+	MainEffect->SetInt("g_iMountHovered", CurrentMountHovered);
 	MainEffect->Begin(&passes, 0);
 	MainEffect->BeginPass(0);
 
+	POINT mount_sectors[Mounts::NUMBER_MOUNTS] = { {0,-1},{1,-1},{1,1},{0,1},{-1,1},{-1,-1} };
 	for (int it = Mounts::RAPTOR; it < Mounts::NUMBER_MOUNTS; it++)
 	{
 		Mounts::Mount mount = static_cast<Mounts::Mount>(it);
-		D3DXVECTOR4 spriteDimensions = baseSpriteDimensions;
+		D3DXVECTOR4 mount_dimensions = baseSpriteDimensions;
+		mount_dimensions.z *= TEX_MOUNT_WIDTH;
+		mount_dimensions.w *= TEX_MOUNT_HEIGHT;
 
-		float mountAngle = (float)it / (float)Mounts::NUMBER_MOUNTS * 2 * (float)M_PI;
-		D3DXVECTOR2 mountLocation = D3DXVECTOR2(cos(mountAngle - (float)M_PI / 2), sin(mountAngle - (float)M_PI / 2)) * 0.25f * 0.66f;
+		mount_dimensions.x += mount_sectors[it].x * mount_dimensions.z/2.0f;
+		mount_dimensions.y += mount_sectors[it].y * mount_dimensions.w/2.0f;
 
-		spriteDimensions.x += mountLocation.x * spriteDimensions.z;
-		spriteDimensions.y += mountLocation.y * spriteDimensions.w;
-
-		float mountDiameter = (float)sin((2 * M_PI / (double)Mounts::NUMBER_MOUNTS) / 2) * 2.f * 0.2f * 0.66f;
-		if (mount == CurrentMountHovered)
-			mountDiameter *= lerp(1.f, 1.1f, smoothstep(MountHoverEffect.GetProgress()));
-		else
-			mountDiameter *= 0.9f;
-
-		spriteDimensions.z *= mountDiameter;
-		spriteDimensions.w *= mountDiameter;
-
-		int v[3] = { it, it, Mounts::NUMBER_MOUNTS };
-		MainEffect->SetValue("g_iMountID", v, sizeof(v));
 		MainEffect->SetBool("g_bMountHovered", (mount == CurrentMountHovered));
 		MainEffect->SetTexture("texMountImage", MountList->GetMountTexture(mount));
-		MainEffect->SetVector("g_vSpriteDimensions", &spriteDimensions);
-		std::array<float, 4> mount_color = { 255, 255, 255, 255 };
-		(void)MountList->GetMountColor(mount, mount_color);
-		MainEffect->SetValue("g_vColor", mount_color.data(), sizeof(D3DXVECTOR4));
+		MainEffect->SetVector("g_vSpriteDimensions", &mount_dimensions);
 		MainEffect->CommitChanges();
 
 		Quad->Draw();
@@ -382,17 +390,59 @@ void MountWheel::Draw()
 	MainEffect->EndPass();
 	MainEffect->End();
 
-	if (ActionModeEnabled)
+	Mounts::Mount central_mount = CurrentMountHovered;
+	if (central_mount == Mounts::NONE)
 	{
-		MainEffect->SetTechnique("Cursor");
-		MainEffect->SetTexture("texBgImage", BackgroundTexture);
-		MainEffect->SetVector("g_vSpriteDimensions", &D3DXVECTOR4(MousePos.x * screenSize.z, MousePos.y * screenSize.w, 0.05f  * screenSize.y * screenSize.z, 0.05f));
+		central_mount = MountList->GetFavoriteMount();
+	}
+	if (central_mount != Mounts::NONE)
+	{
+		MainEffect->SetTechnique("MountLogo");
+		MainEffect->SetTexture("texMountLogo", MountList->GetMountLogoTexture(central_mount));
+		D3DXVECTOR4 logo_dimensions = baseSpriteDimensions;
+		logo_dimensions.z *= TEX_LOGO_WIDTH;
+		logo_dimensions.w *= TEX_LOGO_HEIGHT;
+		MainEffect->SetVector("g_vSpriteDimensions", &logo_dimensions);
+		std::array<float, 4> mount_color = { 255, 255, 255, 255 };
+		(void)MountList->GetMountColor(central_mount, mount_color);
+		MainEffect->SetValue("g_vColor", mount_color.data(), sizeof(D3DXVECTOR4));
 
 		MainEffect->Begin(&passes, 0);
 		MainEffect->BeginPass(0);
 		Quad->Draw();
 		MainEffect->EndPass();
 		MainEffect->End();
+	}
+
+	if (ActionModeEnabled)
+	{
+		if (!ActionCursorTexture)
+		{
+			D3DXCreateTextureFromResource(Device, DllModule, MAKEINTRESOURCE(IDR_ACTION_CURSOR), &ActionCursorTexture);
+		}
+		MainEffect->SetTechnique("Cursor");
+		MainEffect->SetTexture("texCursor", ActionCursorTexture);
+		D3DXVECTOR4 cursor_dimensions;
+		cursor_dimensions.x = MousePos.x * screenSize.z + TEX_CURSOR_WIDTH / 2.0f;
+		cursor_dimensions.y = MousePos.y * screenSize.w + TEX_CURSOR_HEIGHT / 2.0f;
+		cursor_dimensions.z = TEX_CURSOR_WIDTH;
+		cursor_dimensions.w = TEX_CURSOR_HEIGHT;
+		MainEffect->SetVector("g_vSpriteDimensions", &cursor_dimensions);
+		MainEffect->SetBool("g_bMountHovered", (Mounts::NONE != CurrentMountHovered));
+
+		MainEffect->Begin(&passes, 0);
+		MainEffect->BeginPass(0);
+		Quad->Draw();
+		MainEffect->EndPass();
+		MainEffect->End();
+	}
+	else
+	{
+		if (ActionCursorTexture)
+		{
+			ActionCursorTexture->Release();
+			ActionCursorTexture = nullptr;
+		}
 	}
 }
 
@@ -424,7 +474,7 @@ void MountWheel::DetermineHoveredMount()
 
 	FLOAT d3dx_mouse_pos = D3DXVec2LengthSq(&mouse_pos);
 
-	if (d3dx_mouse_pos > SQUARE(WheelScale * 0.135f)) //Out of wheel
+	if (d3dx_mouse_pos > SQUARE(WheelScale * WHEEL_RADIUS)) //Out of wheel
 	{
 		MouseOverWheel = false;
 		CurrentMountHovered = Mounts::NONE;
@@ -433,15 +483,33 @@ void MountWheel::DetermineHoveredMount()
 	{
 		MouseOverWheel = true;
 		// Middle circle does not count as a hover event
-		if (d3dx_mouse_pos > SQUARE(WheelScale * 0.135f * 0.2f))
+		if (d3dx_mouse_pos > SQUARE(WheelScale * MIDDLE_CIRCLE_RADIUS))
 		{
-			float MouseAngle = atan2(-mouse_pos.y, -mouse_pos.x) - 0.5f * (float)M_PI;
+			/*atan2 returns values from (-PI, PI], graphically:
+						|-PI/2
+						|
+			   PI -------------- 0
+						|
+						|PI/2
+			 So, if the first mount (the raptor) is in positive Y-axis, 
+			 adding PI/2 returns 0 radians for the raptor. Then, other mounts 
+			 have an angle relative to it:
+						|Raptor = 0
+						|
+			-PI/2 -------------- PI/2  
+						|
+						|PI
+			*/
+			float MouseAngle = atan2(mouse_pos.y, mouse_pos.x) + 0.5f * (float)M_PI;
+			/* Convert negative values to positive adding 2*PI, so:
+			   0, PI  -> mounts in right middle circle
+			   -PI, 0 -> mounts in left middle circle -> PI, 2*PI */
 			if (MouseAngle < 0)
 			{
-				MouseAngle += float(2 * M_PI);
+				MouseAngle += 2.0f * (float)M_PI;
 			}
 
-			float MountAngle = float(2 * M_PI) / Mounts::NUMBER_MOUNTS;
+			float MountAngle = 2.0f * (float)M_PI / Mounts::NUMBER_MOUNTS;
 			int MountId = int((MouseAngle - MountAngle / 2) / MountAngle + 1) % Mounts::NUMBER_MOUNTS;
 
 			CurrentMountHovered = static_cast<Mounts::Mount>(MountId);
@@ -462,4 +530,3 @@ void MountWheel::DetermineHoveredMount()
 	}
 		
 }
-

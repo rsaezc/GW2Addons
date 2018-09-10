@@ -36,13 +36,15 @@ public:
 	void LoadTextures(IDirect3DDevice9 * dev, HMODULE dll);
 	void UnloadTextures();
 	IDirect3DTexture9* GetMountTexture(Mounts::Mount mount);
+	IDirect3DTexture9* GetMountLogoTexture(Mounts::Mount mount);
 
 private:
 	struct MountType {
 		IDirect3DTexture9* MountTexture;
+		IDirect3DTexture9* MountLogoTexture;
 		KeySequence KeyBind;
 		bool Enabled;
-		MountType() : MountTexture(nullptr), Enabled(false) {};
+		MountType() : MountTexture(nullptr), MountLogoTexture(nullptr), Enabled(false) {};
 	};
 
 	const std::array<float, 4> MountColors[6] = {

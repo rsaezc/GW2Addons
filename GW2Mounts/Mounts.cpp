@@ -136,6 +136,7 @@ void Mounts::LoadTextures(IDirect3DDevice9 * dev, HMODULE dll)
 			{
 				D3DXCreateTextureFromResource(Device, DllModule, MAKEINTRESOURCE(IDR_DISABLED_MOUNTS + it), &(mount_data->MountTexture));
 			}
+			D3DXCreateTextureFromResource(Device, DllModule, MAKEINTRESOURCE(IDR_LOGO_MOUNTS + it), &(mount_data->MountLogoTexture));
 		}
 	}
 }
@@ -154,6 +155,11 @@ void Mounts::UnloadTextures()
 				mount_data->MountTexture->Release();
 				mount_data->MountTexture = nullptr;
 			}
+			if (mount_data->MountLogoTexture)
+			{
+				mount_data->MountLogoTexture->Release();
+				mount_data->MountLogoTexture = nullptr;
+			}
 		}
 	}
 }
@@ -162,8 +168,41 @@ IDirect3DTexture9* Mounts::GetMountTexture(Mounts::Mount mount)
 {
 	if (MOUNT_IS_VALID(mount))
 	{
-		return MountArray[mount].MountTexture;
+		MountType *mount_data = &MountArray[mount];
+		if (!mount_data->MountTexture)
+		{
+			/* Try to recover mount texture if texture failed to load. */
+			if (RESOURCES_LOADED())
+			{
+				if (MOUNT_IS_ENABLED(mount_data))
+				{
+					D3DXCreateTextureFromResource(Device, DllModule, MAKEINTRESOURCE(IDR_ENABLED_MOUNTS + mount), &(mount_data->MountTexture));
+				}
+				else
+				{
+					D3DXCreateTextureFromResource(Device, DllModule, MAKEINTRESOURCE(IDR_DISABLED_MOUNTS + mount), &(mount_data->MountTexture));
+				}
+			}
+		}
+		return mount_data->MountTexture;
 	}
 	return nullptr;
 }
 
+IDirect3DTexture9* Mounts::GetMountLogoTexture(Mounts::Mount mount)
+{
+	if (MOUNT_IS_VALID(mount))
+	{
+		MountType *mount_data = &MountArray[mount];
+		if (!mount_data->MountLogoTexture)
+		{
+			/* Try to recover mount logo texture if texture failed to load. */
+			if (RESOURCES_LOADED())
+			{
+				D3DXCreateTextureFromResource(Device, DllModule, MAKEINTRESOURCE(IDR_LOGO_MOUNTS + mount), &(mount_data->MountLogoTexture));
+			}
+		}
+		return mount_data->MountLogoTexture;
+	}
+	return nullptr;
+}

@@ -330,10 +330,10 @@ void ConfigurationWindow::Draw()
 		float item_width = SLIDER_WIDTH;
 		ImGuiSetNextRightAlignWithIndent(item_width);
 		ImGui::PushItemWidth(item_width);
-		float wheel_scale = WheelWindow->GetWheelScale();
-		if (ImGui::SliderFloat("", &wheel_scale, 0.f, 4.f))
+		int wheel_scale = (int)(WheelWindow->GetWheelScale() * 100);
+		if (ImGui::SliderInt("", &wheel_scale, 10, 150, "%d%%"))
 		{
-			UpdateWheelScale(wheel_scale);
+			UpdateWheelScale(wheel_scale / 100.0f);
 		}
 		ImGui::PopItemWidth();
 

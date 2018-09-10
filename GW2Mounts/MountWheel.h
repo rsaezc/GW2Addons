@@ -65,6 +65,7 @@ private:
 	std::unique_ptr<UnitQuad> Quad;
 	ID3DXEffect* MainEffect = nullptr;
 	IDirect3DTexture9* BackgroundTexture = nullptr;
+	IDirect3DTexture9* ActionCursorTexture = nullptr;
 	IDirect3DDevice9* Device = nullptr;
 	HMODULE DllModule = nullptr;
 	HWND GameWindow = nullptr;
