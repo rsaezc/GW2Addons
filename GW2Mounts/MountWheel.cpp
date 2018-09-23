@@ -4,6 +4,7 @@
 #include "resource.h"
 #include "inputs.h"
 #include "MountWheel.h"
+#include "xxhash/xxhash.h"
 
 #define REF_SCREEN_WIDTH		(1920.0f)
 #define REF_SCREEN_HEIGHT		(1080.0f)
@@ -24,6 +25,13 @@
 
 #define TEX_CURSOR_WIDTH		(32.0f/REF_SCREEN_WIDTH)
 #define TEX_CURSOR_HEIGHT		(32.0f/REF_SCREEN_HEIGHT)
+
+#define DISMOUNT_ICON_POS_X(SCREEN_WIDTH)		((SCREEN_WIDTH) * 1319.0f/REF_SCREEN_WIDTH)
+#define DISMOUNT_ICON_POS_Y(SCREEN_HEIGTH)		((SCREEN_HEIGTH) * 997.0f/REF_SCREEN_HEIGHT)
+#define DISMOUNT_ICON_WIDTH(SCREEN_WIDTH)		((SCREEN_WIDTH) * 46.0f/REF_SCREEN_WIDTH)
+#define DISMOUNT_ICON_HEIGTH(SCREEN_HEIGTH)		((SCREEN_HEIGTH) * 34.0f/REF_SCREEN_HEIGHT)
+
+#define D3D_SURFACE_FORMAT_LEN	(4U)
 
 #define SQUARE(x) ((x) * (x))
 
@@ -48,37 +56,43 @@ void MountWheel::Show()
 {
 	if (State == RESOURCES_LOADED)
 	{
-		State = WINDOW_VISIBLE;
-		WheelFadeInEffect.Start();
-
-		if (ActionModeEnabled)
+		if (!DismountKeyBind.empty())
 		{
-			WheelPosition.x = WheelPosition.y = 0.5f;
-
-			RECT rect = { 0 };
-			if (GetWindowRect(GameWindow, &rect))
+			if (!DismountCalibration)
 			{
-				if (SetCursorPos((rect.right - rect.left) / 2 + rect.left, (rect.bottom - rect.top) / 2 + rect.top))
+				if (DismountSignature == GetDismountSignatureFromScreenCapture())
 				{
-					MousePos.x = (LONG)(ScreenSize.cx * 0.5f);
-					MousePos.y = (LONG)(ScreenSize.cy * 0.5f);
+					SendKeybind(DismountKeyBind);
+					State = WINDOW_WAIT_EVENT;
+					return;
 				}
 			}
-		}
-		else
-		{
-			(void)GetCursorPos(&MousePos);
-			WheelPosition.x = MousePos.x / (float)ScreenSize.cx;
-			WheelPosition.y = MousePos.y / (float)ScreenSize.cy;
+			else
+			{
+				DismountSignature = GetDismountSignatureFromScreenCapture();
+			}
 		}
 
-		DetermineHoveredMount();
+		DoShow();
 	}
 }
 
 bool MountWheel::IsVisible()
 {
 	return (State == WINDOW_VISIBLE);
+}
+
+bool MountWheel::IsWaitingEvent()
+{
+	return (State == WINDOW_WAIT_EVENT);
+}
+
+void MountWheel::DismountEndEvent()
+{
+	if (State == WINDOW_WAIT_EVENT)
+	{
+		DoShow();
+	}
 }
 
 void MountWheel::SetKeyBind(const KeySequence& keybind)
@@ -89,6 +103,26 @@ void MountWheel::SetKeyBind(const KeySequence& keybind)
 KeySequence& MountWheel::GetKeyBind()
 {
 	return KeyBind;
+}
+
+void MountWheel::SetDismountKeyBind(const KeySequence& keybind)
+{
+	DismountKeyBind = keybind;
+}
+
+KeySequence& MountWheel::GetDismountKeyBind()
+{
+	return DismountKeyBind;
+}
+
+void MountWheel::SetDismountSignature(const std::string signature)
+{
+	DismountSignature = signature;
+}
+
+std::string MountWheel::GetDismountSignature()
+{
+	return DismountSignature;
 }
 
 void MountWheel::SetWheelScale(float scale)
@@ -106,9 +140,19 @@ void MountWheel::EnableActionMode(bool enable)
 	ActionModeEnabled = enable;
 }
 
-bool MountWheel::isActionModeEnabled()
+bool MountWheel::IsActionModeEnabled()
 {
 	return ActionModeEnabled;
+}
+
+void MountWheel::EnableDismountCalibration(bool enable)
+{
+	DismountCalibration = enable;
+}
+
+bool MountWheel::IsDismountCalibrationEnabled()
+{
+	return DismountCalibration;
 }
 
 void MountWheel::SetScreenSize(uint width, uint height)
@@ -124,6 +168,7 @@ void MountWheel::LoadResources(IDirect3DDevice9 * dev, HMODULE dll, HWND game_wi
 		Device = dev;
 		DllModule = dll;
 		GameWindow = game_window;
+
 		try
 		{
 			Quad = std::make_unique<UnitQuad>(Device);
@@ -133,6 +178,7 @@ void MountWheel::LoadResources(IDirect3DDevice9 * dev, HMODULE dll, HWND game_wi
 			Quad = nullptr;
 			return;
 		}
+
 		ID3DXBuffer* errorBuffer = nullptr;
 		D3DXCreateEffectFromResource(Device, DllModule, MAKEINTRESOURCE(IDR_SHADER), nullptr, nullptr, 0, nullptr, &MainEffect, &errorBuffer);
 		if (errorBuffer)
@@ -143,12 +189,14 @@ void MountWheel::LoadResources(IDirect3DDevice9 * dev, HMODULE dll, HWND game_wi
 		if (!MainEffect)
 		{
 			Quad.reset();
+			Quad = nullptr;
 			return;
 		}
 		D3DXCreateTextureFromResource(Device, DllModule, MAKEINTRESOURCE(IDR_BACKGROUND), &BackgroundTexture);
 		if (!BackgroundTexture)
 		{
 			Quad.reset();
+			Quad = nullptr;
 			MainEffect->Release();
 			MainEffect = nullptr;
 			return;
@@ -162,7 +210,9 @@ void MountWheel::ReleaseResources()
 {
 	if (State != RESOURCES_NO_INIT)
 	{
+		Hide();
 		Quad.reset();
+		Quad = nullptr;
 		MountList->UnloadTextures();
 		BackgroundTexture->Release();
 		BackgroundTexture = nullptr;
@@ -446,6 +496,35 @@ void MountWheel::Draw()
 	}
 }
 
+void MountWheel::DoShow()
+{
+	State = WINDOW_VISIBLE;
+	WheelFadeInEffect.Start();
+
+	if (ActionModeEnabled)
+	{
+		WheelPosition.x = WheelPosition.y = 0.5f;
+
+		RECT rect = { 0 };
+		if (GetWindowRect(GameWindow, &rect))
+		{
+			if (SetCursorPos((rect.right - rect.left) / 2 + rect.left, (rect.bottom - rect.top) / 2 + rect.top))
+			{
+				MousePos.x = (LONG)(ScreenSize.cx * 0.5f);
+				MousePos.y = (LONG)(ScreenSize.cy * 0.5f);
+			}
+		}
+	}
+	else
+	{
+		(void)GetCursorPos(&MousePos);
+		WheelPosition.x = MousePos.x / (float)ScreenSize.cx;
+		WheelPosition.y = MousePos.y / (float)ScreenSize.cy;
+	}
+
+	DetermineHoveredMount();
+}
+
 void MountWheel::Hide()
 {
 	if (State == WINDOW_VISIBLE)
@@ -529,4 +608,90 @@ void MountWheel::DetermineHoveredMount()
 		MountHoverEffect.Start();
 	}
 		
+}
+
+std::string MountWheel::GetDismountSignatureFromScreenCapture()
+{
+	POINT dismount_icon_pos = {(LONG)DISMOUNT_ICON_POS_X(ScreenSize.cx),
+							   (LONG)DISMOUNT_ICON_POS_Y(ScreenSize.cy)};
+	SIZE dismount_icon_size = {(LONG)DISMOUNT_ICON_WIDTH(ScreenSize.cx),
+							   (LONG)DISMOUNT_ICON_HEIGTH(ScreenSize.cy)};
+	BYTE *dismount_icon_data = new BYTE[D3D_SURFACE_FORMAT_LEN *
+								        dismount_icon_size.cx * dismount_icon_size.cy];
+
+	IDirect3DSurface9* back_buffer = NULL;
+	if (D3D_OK == Device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &back_buffer))
+	{
+		D3DSURFACE_DESC surface_info;
+		
+		back_buffer->GetDesc(&surface_info);
+		if ((surface_info.Format != D3DFMT_A8R8G8B8) 
+			&& (surface_info.Format != D3DFMT_X8R8G8B8) 
+			&& (surface_info.Format != D3DFMT_A2R10G10B10))
+		{
+			back_buffer->Release();
+			delete[] dismount_icon_data;
+			return "";
+		}
+
+		IDirect3DSurface9* screen_data = NULL;
+		if (D3D_OK == Device->CreateOffscreenPlainSurface(surface_info.Width, surface_info.Height,
+			surface_info.Format, D3DPOOL_SYSTEMMEM, &screen_data, NULL))
+		{
+			if (D3D_OK == Device->GetRenderTargetData(back_buffer, screen_data))
+			{
+				RECT capture_rect;
+				capture_rect.top = dismount_icon_pos.y;
+				capture_rect.left = dismount_icon_pos.x;
+				capture_rect.bottom = capture_rect.top + dismount_icon_size.cy;
+				capture_rect.right = capture_rect.left +  dismount_icon_size.cx;
+
+				D3DLOCKED_RECT icon_data;
+				screen_data->LockRect(&icon_data, &capture_rect, 0);
+
+				PBYTE icon_pixels = (PBYTE)icon_data.pBits;
+				for (LONG y = 0; y < dismount_icon_size.cy; y++)
+				{
+					memcpy(&dismount_icon_data[y * D3D_SURFACE_FORMAT_LEN * dismount_icon_size.cx], 
+						   icon_pixels, D3D_SURFACE_FORMAT_LEN * dismount_icon_size.cx);
+					icon_pixels += icon_data.Pitch;
+				}
+				screen_data->UnlockRect();
+#ifdef DEBUG				
+				IDirect3DTexture9 *icon_texture = NULL;
+				if (D3D_OK == Device->CreateTexture(dismount_icon_size.cx, dismount_icon_size.cy,
+												    1, 0, surface_info.Format, D3DPOOL_SYSTEMMEM, 
+													&icon_texture, NULL))
+				{
+					IDirect3DSurface9* texture_data = NULL;
+					if (D3D_OK == icon_texture->GetSurfaceLevel(0, &texture_data))
+					{
+						D3DLOCKED_RECT lockedRect;
+						texture_data->LockRect(&lockedRect, NULL, 0);
+
+						PBYTE texture_pixels = (PBYTE)lockedRect.pBits;
+						for (LONG y = 0; y < dismount_icon_size.cy; y++)
+						{
+							memcpy(texture_pixels, 
+								   &dismount_icon_data[y * D3D_SURFACE_FORMAT_LEN * dismount_icon_size.cx],
+								   D3D_SURFACE_FORMAT_LEN * dismount_icon_size.cx);
+							texture_pixels += lockedRect.Pitch;
+						}
+						texture_data->UnlockRect();
+
+						D3DXSaveTextureToFile(TEXT("debug.bmp"), D3DXIFF_BMP, icon_texture, NULL);
+					}
+					if (NULL != texture_data) texture_data->Release();
+				}
+				if (NULL != icon_texture) icon_texture->Release();
+#endif /* DEBUG */
+			}
+		}
+		if (NULL != screen_data) screen_data->Release();
+	}
+	if(NULL != back_buffer) back_buffer->Release();
+	
+	std::string signature = std::to_string(XXH64(dismount_icon_data, sizeof(dismount_icon_data), 0));
+	delete[] dismount_icon_data;
+	return signature;
 }

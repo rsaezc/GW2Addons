@@ -12,6 +12,6 @@ struct EventKey
 extern KeySequence DownKeys;
 extern std::list<EventKey> EventKeys;
 
-void SendQueuedInputs(HWND window);
+bool SendQueuedInputs(HWND window);
 void SendKeybind(const KeySequence& vkeys);
 void ProcessEventKeysFromInputMessage(UINT msg, WPARAM wParam, LPARAM lParam);

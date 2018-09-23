@@ -41,8 +41,8 @@
 #define V_SPACE_BETWEEN_GROUPS		(5.0f)
 #define V_SPACE_INSIDE_GROUPS		(3.0f)
 
-/* Sizes */
-#define WINDOW_MIN_SIZE				(ImVec2(388.0f, 415.0f))
+/* Sizes */ 
+#define WINDOW_MIN_SIZE				(ImVec2(388.0f, 475.0f))
 #define INPUT_TEXT_WIDTH			(ImGui::GetWindowWidth() * 0.38f)
 #define BUTTON_WIDTH				(ImGui::GetWindowWidth() * 0.10f)
 #define COMBO_WIDTH					(ImGui::GetWindowWidth() * 0.48f)
@@ -96,6 +96,8 @@ void ConfigurationWindow::InitResources()
 		ConfigKeybind.SetCallback = [this](const std::set<unsigned int>& val) { UpdateConfigKeybind(val); };
 		WheelKeybind.InitKeybind(WheelWindow->GetKeyBind());
 		WheelKeybind.SetCallback = [this](const std::set<unsigned int>& val) { UpdateWheelKeybind(val); };
+		DismountKeybind.InitKeybind(WheelWindow->GetDismountKeyBind());
+		DismountKeybind.SetCallback = [this](const std::set<unsigned int>& val) { UpdateDismountKeybind(val); };
 		for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 		{
 			std::set<unsigned int> mount_keybind;
@@ -180,6 +182,7 @@ bool ConfigurationWindow::ProcessInputEvents(HWND hWnd, UINT msg, WPARAM wParam,
 
 		ConfigKeybind.UpdateKeybind(fullKeybind, keyLifted);
 		WheelKeybind.UpdateKeybind(fullKeybind, keyLifted);
+		DismountKeybind.UpdateKeybind(fullKeybind, keyLifted);
 
 		for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 		{
@@ -205,6 +208,7 @@ bool ConfigurationWindow::ProcessInputEvents(HWND hWnd, UINT msg, WPARAM wParam,
 	case WM_RBUTTONUP:
 		ConfigKeybind.CancelKeybind();
 		WheelKeybind.CancelKeybind();
+		DismountKeybind.CancelKeybind();
 		for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 		{
 			MountKeybinds[i].CancelKeybind();
@@ -252,6 +256,7 @@ bool ConfigurationWindow::ProcessInputEvents(HWND hWnd, UINT msg, WPARAM wParam,
 			{
 				ConfigKeybind.CancelKeybind();
 				WheelKeybind.CancelKeybind();
+				DismountKeybind.CancelKeybind();
 				for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 				{
 					MountKeybinds[i].CancelKeybind();
@@ -339,7 +344,7 @@ void ConfigurationWindow::Draw()
 
 		ImGuiAddVerticalSpace(V_SPACE_INSIDE_GROUPS);
 
-		bool action_mode = WheelWindow->isActionModeEnabled();
+		bool action_mode = WheelWindow->IsActionModeEnabled();
 		if (ImGui::Checkbox("Overlay in action mode.", &action_mode))
 		{
 			UpdateWheelActionMode(action_mode);
@@ -395,6 +400,19 @@ void ConfigurationWindow::Draw()
 
 		ImGui::Text("Keybinds (same as game keybinds):");
 		ImGui::Indent();
+
+		ImGuiAddVerticalSpace(V_SPACE_INSIDE_GROUPS);
+
+		DrawKeybindInput("Dismount", DismountKeybind);
+
+		bool dismount_calibration = WheelWindow->IsDismountCalibrationEnabled();
+		if (ImGui::Checkbox("Dismount calibration.", &dismount_calibration))
+		{
+			UpdateDismountCalibration(dismount_calibration);
+		}
+
+		ImGuiAddVerticalSpace(V_SPACE_INSIDE_GROUPS);
+
 		for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 		{
 			Mounts::Mount mount = static_cast<Mounts::Mount>(i);
@@ -439,12 +457,17 @@ void ConfigurationWindow::LoadConfiguration()
 	// Load INI settings
 	ConfigIniHandler.SetUnicode();
 	ConfigIniHandler.LoadFile(ConfigIniLocation);
-	bool wheel_action_mode = WheelWindow->isActionModeEnabled();
+	bool wheel_action_mode = WheelWindow->IsActionModeEnabled();
 	wheel_action_mode = ConfigIniHandler.GetBoolValue("General", "mount_wheel_action_mode", wheel_action_mode);
 	WheelWindow->EnableActionMode(wheel_action_mode);
 	float wheel_scale = WheelWindow->GetWheelScale();
 	wheel_scale = (float)ConfigIniHandler.GetDoubleValue("General", "mount_wheel_scale", wheel_scale);
 	WheelWindow->SetWheelScale(wheel_scale);
+	const char* dismount_signature = ConfigIniHandler.GetValue("General", "dismount_signature", nullptr);
+	if (dismount_signature)
+	{
+		WheelWindow->SetDismountSignature(std::string(dismount_signature));
+	}
 
 	KeySequence keybind = KeyBind;
 	const char* config_keybind = ConfigIniHandler.GetValue("Keybinds", "configuration_window", nullptr);
@@ -454,7 +477,9 @@ void ConfigurationWindow::LoadConfiguration()
 	const char* wheel_keybind = ConfigIniHandler.GetValue("Keybinds", "mount_wheel", nullptr);
 	KeybindFromString(wheel_keybind, keybind);
 	if (!keybind.empty()) WheelWindow->SetKeyBind(keybind);
-
+	const char* dismount_keybind = ConfigIniHandler.GetValue("Keybinds", "dismount", nullptr);
+	KeybindFromString(dismount_keybind, keybind);
+	if (!keybind.empty()) WheelWindow->SetDismountKeyBind(keybind);
 	for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 	{
 		Mounts::Mount mount = static_cast<Mounts::Mount>(i);
@@ -462,7 +487,7 @@ void ConfigurationWindow::LoadConfiguration()
 		KeybindFromString(mount_keybind, keybind);
 		MountList->SetMountKeyBind(mount, keybind);
 	}
-
+	/* To update the favorite mount correctly, first the mounts must be activated setting their keybinds. */
 	Mounts::Mount favorite_mount = MountList->GetFavoriteMount();
 	favorite_mount = static_cast<Mounts::Mount>(ConfigIniHandler.GetLongValue("General", "favorite_mount", (int)favorite_mount));
 	MountList->SetFavoriteMount(favorite_mount);
@@ -585,6 +610,17 @@ void ConfigurationWindow::UpdateWheelKeybind(const KeySequence& val)
 	ConfigIniHandler.SaveFile(ConfigIniLocation);
 }
 
+void ConfigurationWindow::UpdateDismountKeybind(const KeySequence& val)
+{
+	WheelWindow->SetDismountKeyBind(val);
+	std::string setting_value = "";
+	for (const auto& k : val)
+		setting_value += std::to_string(k) + ", ";
+
+	ConfigIniHandler.SetValue("Keybinds", "dismount", (setting_value.size() > 0 ? setting_value.substr(0, setting_value.size() - 2) : setting_value).c_str());
+	ConfigIniHandler.SaveFile(ConfigIniLocation);
+}
+
 void ConfigurationWindow::UpdateMountKeybind(Mounts::Mount mount, const KeySequence& val)
 {
 	MountList->SetMountKeyBind(mount, val);
@@ -608,6 +644,16 @@ void ConfigurationWindow::UpdateWheelActionMode(bool enable)
 	WheelWindow->EnableActionMode(enable);
 	ConfigIniHandler.SetBoolValue("General", "mount_wheel_action_mode", enable);
 	ConfigIniHandler.SaveFile(ConfigIniLocation);
+}
+
+void ConfigurationWindow::UpdateDismountCalibration(bool enable)
+{
+	WheelWindow->EnableDismountCalibration(enable);
+	if (!enable)
+	{
+		ConfigIniHandler.SetValue("General", "dismount_signature", WheelWindow->GetDismountSignature().c_str());
+		ConfigIniHandler.SaveFile(ConfigIniLocation);
+	}
 }
 
 void ConfigurationWindow::UpdateFavoriteMount(Mounts::Mount mount)

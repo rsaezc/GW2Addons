@@ -16,14 +16,26 @@ public:
 	void Show();
 	bool IsVisible();
 
+	bool IsWaitingEvent();
+	void DismountEndEvent();
+
 	void SetKeyBind(const KeySequence& keybind);
 	KeySequence& GetKeyBind();
+
+	void SetDismountKeyBind(const KeySequence& keybind);
+	KeySequence& GetDismountKeyBind();
+
+	void SetDismountSignature(const std::string signature);
+	std::string GetDismountSignature();
 
 	void SetWheelScale(float scale);
 	float GetWheelScale();
 
 	void EnableActionMode(bool enable);
-	bool isActionModeEnabled();
+	bool IsActionModeEnabled();
+
+	void EnableDismountCalibration(bool enable);
+	bool IsDismountCalibrationEnabled();
 
 	void SetScreenSize(uint width, uint height);
 
@@ -38,13 +50,17 @@ private:
 	{
 		RESOURCES_NO_INIT,
 		RESOURCES_LOADED,
-		WINDOW_VISIBLE
+		WINDOW_VISIBLE,
+		WINDOW_WAIT_EVENT
 	};
 	WindowState State = RESOURCES_NO_INIT;
 
 	KeySequence KeyBind = { VK_SHIFT, VK_MENU, 'Z' };
+	KeySequence DismountKeyBind;
+	std::string DismountSignature;
 	float WheelScale = 1.f;
 	bool ActionModeEnabled = false;
+	bool DismountCalibration = false;
 
 	SIZE ScreenSize = { 0, 0 };
 	D3DXVECTOR2 WheelPosition;
@@ -62,7 +78,7 @@ private:
 	EffectProgressTimer WheelFadeInEffect;
 	EffectProgressTimer MountHoverEffect;
 
-	std::unique_ptr<UnitQuad> Quad;
+	std::unique_ptr<UnitQuad> Quad = nullptr;
 	ID3DXEffect* MainEffect = nullptr;
 	IDirect3DTexture9* BackgroundTexture = nullptr;
 	IDirect3DTexture9* ActionCursorTexture = nullptr;
@@ -70,7 +86,9 @@ private:
 	HMODULE DllModule = nullptr;
 	HWND GameWindow = nullptr;
 
+	void DoShow();
 	void Hide();
 	void DetermineHoveredMount();
+	std::string GetDismountSignatureFromScreenCapture();
 };
 

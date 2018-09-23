@@ -161,19 +161,20 @@ void ProcessEventKeysFromInputMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 }
 
-void SendQueuedInputs(HWND window)
+bool SendQueuedInputs(HWND window)
 {
 	if (QueuedInputs.empty())
-		return;
+		return false;
 
 	mstime currentTime = timeInMS();
 
 	auto& qi = QueuedInputs.front();
 
 	if (currentTime < qi.t)
-		return;
+		return true;
 
 	PostMessage(window, qi.msg, qi.wParam, qi.lParam);
 
 	QueuedInputs.pop_front();
+	return true;
 }

@@ -135,7 +135,13 @@ void PostReset(IDirect3DDevice9* dev, D3DPRESENT_PARAMETERS *pPresentationParame
 void Draw(IDirect3DDevice9* dev, bool FrameDrawn, bool SceneEnded)
 {
 	// This is the closest we have to a reliable "update" function, so use it as one
-	SendQueuedInputs(GameWindow);
+	if (!SendQueuedInputs(GameWindow))
+	{
+		if (WheelWindow.IsWaitingEvent())
+		{
+			WheelWindow.DismountEndEvent();
+		}
+	}
 
 	if (FrameDrawn)
 	{

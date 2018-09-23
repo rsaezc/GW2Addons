@@ -46,6 +46,7 @@ private:
 
 	ImGuiKeybind ConfigKeybind;
 	ImGuiKeybind WheelKeybind;
+	ImGuiKeybind DismountKeybind;
 	ImGuiKeybind MountKeybinds[Mounts::NUMBER_MOUNTS];
 
 	// Config file settings
@@ -66,9 +67,11 @@ private:
 	// Config update events
 	void UpdateConfigKeybind(const KeySequence& val);
 	void UpdateWheelKeybind(const KeySequence& val);
+	void UpdateDismountKeybind(const KeySequence& val);
 	void UpdateMountKeybind(Mounts::Mount mount, const KeySequence& val);
 	void UpdateWheelScale(float scale);
 	void UpdateWheelActionMode(bool enable);
+	void UpdateDismountCalibration(bool enable);
 	void UpdateFavoriteMount(Mounts::Mount mount);
 
 	//Utils
