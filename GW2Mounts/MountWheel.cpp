@@ -256,7 +256,6 @@ bool MountWheel::ProcessInputEvents(UINT msg, WPARAM wParam, LPARAM lParam)
 		MousePos.y = (signed short)(lParam >> 16);
 		if (!CameraEnabled)
 		{
-			DetermineHoveredMount();
 			if (DragEnabled)
 			{
 				WheelPosition.x += (MousePos.x - DragStartPos.x) / (float)ScreenSize.cx;
@@ -264,6 +263,7 @@ bool MountWheel::ProcessInputEvents(UINT msg, WPARAM wParam, LPARAM lParam)
 				DragStartPos = MousePos;
 				return true;
 			}
+			DetermineHoveredMount();
 			if (MouseOverWheel || ActionModeEnabled)
 			{
 				return true;
