@@ -13,8 +13,9 @@ public:
 
 	void Show();
 	bool IsVisible();
+	void Hide();
 
-	KeySequence& GetKeyBind();
+	const KeySequence& GetKeyBind();
 
 	void InitResources();
 	void ConfigureResources(IDirect3DDevice9* dev, HWND game_window);
@@ -58,11 +59,9 @@ private:
 	TCHAR ConfigIniLocation[MAX_PATH];
 	char ImGuiConfigIniLocation[MAX_PATH];
 
-	void Hide();
-
 	void LoadConfiguration();
 	void LoadCustomStyle();
-	void DrawKeybindInput(const std::string & name, ImGuiKeybind & setting);
+	void DrawKeybindInput(const std::string& name, ImGuiKeybind& setting);
 
 	// Config update events
 	void UpdateConfigKeybind(const KeySequence& val);

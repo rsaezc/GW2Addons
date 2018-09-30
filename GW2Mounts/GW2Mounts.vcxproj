@@ -106,7 +106,7 @@ copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</C
     <ClCompile Include="imgui\examples\imgui_impl_dx9.cpp" />
     <ClCompile Include="imgui\examples\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui_ext.cpp" />
-    <ClCompile Include="input.cpp" />
+    <ClCompile Include="InputKeys.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -131,7 +131,7 @@ copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</C
     <ClInclude Include="imgui\stb_textedit.h" />
     <ClInclude Include="imgui\stb_truetype.h" />
     <ClInclude Include="imgui_ext.h" />
-    <ClInclude Include="inputs.h" />
+    <ClInclude Include="InputKeys.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Mounts.h" />
     <ClInclude Include="MountWheel.h" />

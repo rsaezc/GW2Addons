@@ -1,10 +1,10 @@
 #include "main.h"
 #include <d3d9.h>
 #include "minhook/include/MinHook.h"
-#include "inputs.h"
 #include "ConfigurationWindow.h"
 #include "MountWheel.h"
 #include "Mounts.h"
+#include "InputKeys.h"
 
 Mounts MountList;
 MountWheel WheelWindow(&MountList);
@@ -33,6 +33,7 @@ bool WINAPI DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 
 		MH_Initialize();
 		ConfigWindow.InitResources();
+		InputKeys::InitInputQueue();
 		break;
 	}
 	case DLL_PROCESS_DETACH:
@@ -50,51 +51,77 @@ extern IMGUI_IMPL_API LRESULT  ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT ms
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	bool msg_exhausted = false;
+	InputKeys::InputKey input_key = { msg, wParam, lParam };
 
-	ProcessEventKeysFromInputMessage(msg, wParam, lParam);
 	if (msg == WM_KILLFOCUS)
 	{
-		DownKeys.clear();
-	}
-
-	if (ConfigWindow.IsVisible())
-	{
-		msg_exhausted = ConfigWindow.ProcessInputEvents(hWnd, msg, wParam, lParam);
+		InputKeys::ClearInput();
+		ConfigWindow.Hide();
+		WheelWindow.Hide();
 	}
 	else
 	{
-		if (WheelWindow.IsVisible())
+		if (!InputKeys::ProcessInputKeyFromInputMessage(input_key, msg, wParam, lParam))
 		{
-			msg_exhausted = WheelWindow.ProcessInputEvents(msg, wParam, lParam);
+			if (msg != WM_NULL) //Not input key. So, keybind or other window message
+			{
+				if (InputKeys::IsKeybindSent() && WheelWindow.IsWaitingEvent())
+				{
+					WheelWindow.DismountEndEvent();
+				}
+				return CallWindowProc(BaseWndProc, hWnd, input_key.msg, input_key.wParam, input_key.lParam);
+			}
+			else
+			{
+				//Input key delayed.
+				return true;
+			}
+		}
+
+		if (ConfigWindow.IsVisible())
+		{
+			msg_exhausted = ConfigWindow.ProcessInputEvents(hWnd, input_key.msg, input_key.wParam, input_key.lParam);
 		}
 		else
 		{
-			if (!EventKeys.empty() && (DownKeys == WheelWindow.GetKeyBind())) //Determine overlay key binds
+			if (WheelWindow.IsVisible())
 			{
-				WheelWindow.Show();
-				msg_exhausted = true;
+				msg_exhausted = WheelWindow.ProcessInputEvents(input_key.msg, input_key.wParam, input_key.lParam);
+			}
+			else
+			{
+				if (InputKeys::GetInputEvent() == InputKeys::INPUT_PRESS_EVENT)
+				{
+					if (InputKeys::GetPressedKeys() == WheelWindow.GetKeyBind()) //Determine overlay key binds
+					{
+						WheelWindow.Show();
+						msg_exhausted = true;
+					}
+				}
+			}
+
+			if (!msg_exhausted)
+			{
+				if (InputKeys::GetInputEvent() == InputKeys::INPUT_PRESS_EVENT)
+				{
+					if (InputKeys::GetPressedKeys() == ConfigWindow.GetKeyBind()) //Determine config window key binds
+					{
+
+						ConfigWindow.Show();
+						msg_exhausted = true;
+					}
+				}
 			}
 		}
 
-		if (!msg_exhausted)
+		InputKeys::ClearInputEvents();
+		if (msg_exhausted)
 		{
-			if (!EventKeys.empty() && (DownKeys == ConfigWindow.GetKeyBind())) //Determine config window key binds
-			{
-
-				ConfigWindow.Show();
-				msg_exhausted = true;
-			}
+			return true;
 		}
 	}
-
-	EventKeys.clear();
-	if (msg_exhausted)
-	{
-		return true;
-	}
-
 	//Message not exhausted (i.e. needs more processing) must be sent to game
-	return CallWindowProc(BaseWndProc, hWnd, msg, wParam, lParam);
+	return CallWindowProc(BaseWndProc, hWnd, input_key.msg, input_key.wParam, input_key.lParam);
 }
 
 void PreCreateDevice(HWND hFocusWindow)
@@ -135,13 +162,7 @@ void PostReset(IDirect3DDevice9* dev, D3DPRESENT_PARAMETERS *pPresentationParame
 void Draw(IDirect3DDevice9* dev, bool FrameDrawn, bool SceneEnded)
 {
 	// This is the closest we have to a reliable "update" function, so use it as one
-	if (!SendQueuedInputs(GameWindow))
-	{
-		if (WheelWindow.IsWaitingEvent())
-		{
-			WheelWindow.DismountEndEvent();
-		}
-	}
+	InputKeys::SendQueuedInputs(GameWindow);
 
 	if (FrameDrawn)
 	{

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <vector>
 #include "Utility.h"
-#include "inputs.h"
+#include "InputKeys.h"
 #include "ConfigurationWindow.h"
 
 /* Colors */
@@ -78,7 +78,7 @@ bool ConfigurationWindow::IsVisible()
 	return (State == WINDOW_VISIBLE);
 }
 
-std::set<unsigned int>& ConfigurationWindow::GetKeyBind()
+const KeySequence& ConfigurationWindow::GetKeyBind()
 {
 	return KeyBind;
 }
@@ -93,20 +93,20 @@ void ConfigurationWindow::InitResources()
 
 		// Set ImGui keybinds
 		ConfigKeybind.InitKeybind(KeyBind);
-		ConfigKeybind.SetCallback = [this](const std::set<unsigned int>& val) { UpdateConfigKeybind(val); };
+		ConfigKeybind.SetCallback = [this](const KeySequence& val) { UpdateConfigKeybind(val); };
 		WheelKeybind.InitKeybind(WheelWindow->GetKeyBind());
-		WheelKeybind.SetCallback = [this](const std::set<unsigned int>& val) { UpdateWheelKeybind(val); };
+		WheelKeybind.SetCallback = [this](const KeySequence& val) { UpdateWheelKeybind(val); };
 		DismountKeybind.InitKeybind(WheelWindow->GetDismountKeyBind());
-		DismountKeybind.SetCallback = [this](const std::set<unsigned int>& val) { UpdateDismountKeybind(val); };
+		DismountKeybind.SetCallback = [this](const KeySequence& val) { UpdateDismountKeybind(val); };
 		for (int i = 0; i < Mounts::NUMBER_MOUNTS; i++)
 		{
-			std::set<unsigned int> mount_keybind;
+			KeySequence mount_keybind;
 			Mounts::Mount mount = static_cast<Mounts::Mount>(i);
 			if (MountList->GetMountKeyBind(mount, mount_keybind))
 			{
 				MountKeybinds[i].InitKeybind(mount_keybind);
 			}
-			MountKeybinds[i].SetCallback = [this, mount](const std::set<unsigned int>& val) { UpdateMountKeybind(mount, val); };
+			MountKeybinds[i].SetCallback = [this, mount](const KeySequence& val) { UpdateMountKeybind(mount, val); };
 		}
 
 		// Init ImGui
@@ -166,18 +166,20 @@ bool ConfigurationWindow::ProcessInputEvents(HWND hWnd, UINT msg, WPARAM wParam,
 		return ret_val;
 	}
 
-	if (!EventKeys.empty()) //Update keybinds with down event keys
+	InputKeys::InputEvent input_event = InputKeys::GetInputEvent();
+	if (input_event != InputKeys::INPUT_NO_EVENT) //Update keybinds with down event keys
 	{
 		// If a key was lifted, we consider the key combination *prior* to this key being lifted as the keybind
 		bool keyLifted = false;
-		auto fullKeybind = DownKeys;
-		for (const auto& ek : EventKeys)
+		KeySequence fullKeybind;
+		if (input_event == InputKeys::INPUT_RELEASE_EVENT)
 		{
-			if (!ek.down)
-			{
-				fullKeybind.insert(ek.vk);
-				keyLifted = true;
-			}
+			fullKeybind = InputKeys::GetLastPressedKeys();
+			keyLifted = true;
+		}
+		else
+		{
+			fullKeybind = InputKeys::GetPressedKeys();
 		}
 
 		ConfigKeybind.UpdateKeybind(fullKeybind, keyLifted);
@@ -193,9 +195,6 @@ bool ConfigurationWindow::ProcessInputEvents(HWND hWnd, UINT msg, WPARAM wParam,
 	auto& io = ImGui::GetIO();
 	switch (msg)
 	{
-	case WM_KILLFOCUS:
-		Hide();
-		break;
 	case WM_MOUSEMOVE:
 		io.MousePos.x = (signed short)(lParam);
 		io.MousePos.y = (signed short)(lParam >> 16);
@@ -683,7 +682,7 @@ void ConfigurationWindow::KeybindFromString(const char* keys, KeySequence& out)
 			std::string substr;
 			std::getline(ss, substr, ',');
 			int val = std::stoi(substr);
-			out.insert((uint)val);
+			out.push_back((uint)val);
 		}
 	}
 }

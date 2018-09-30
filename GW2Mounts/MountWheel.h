@@ -15,18 +15,19 @@ public:
 
 	void Show();
 	bool IsVisible();
+	void Hide();
 
 	bool IsWaitingEvent();
 	void DismountEndEvent();
 
 	void SetKeyBind(const KeySequence& keybind);
-	KeySequence& GetKeyBind();
+	const KeySequence& GetKeyBind();
 
 	void SetDismountKeyBind(const KeySequence& keybind);
-	KeySequence& GetDismountKeyBind();
+	const KeySequence& GetDismountKeyBind();
 
 	void SetDismountSignature(const std::string signature);
-	std::string GetDismountSignature();
+	const std::string GetDismountSignature();
 
 	void SetWheelScale(float scale);
 	float GetWheelScale();
@@ -90,8 +91,7 @@ private:
 	HWND GameWindow = nullptr;
 
 	void DoShow();
-	void Hide();
 	void DetermineHoveredMount();
-	std::string GetDismountSignatureFromScreenCapture();
+	const std::string GetDismountSignatureFromScreenCapture();
 };
 

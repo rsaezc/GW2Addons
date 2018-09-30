@@ -2,7 +2,7 @@
 #include <math.h>
 #include <functional>
 #include "resource.h"
-#include "inputs.h"
+#include "InputKeys.h"
 #include "MountWheel.h"
 #include "xxhash/xxhash.h"
 
@@ -60,7 +60,7 @@ void MountWheel::Show()
 			{
 				if (DismountSignature == GetDismountSignatureFromScreenCapture())
 				{
-					SendKeybind(DismountKeyBind);
+					InputKeys::SendKeybind(DismountKeyBind);
 					State = WINDOW_WAIT_EVENT;
 					return;
 				}
@@ -99,7 +99,7 @@ void MountWheel::SetKeyBind(const KeySequence& keybind)
 	KeyBind = keybind;
 }
 
-KeySequence& MountWheel::GetKeyBind()
+const KeySequence& MountWheel::GetKeyBind()
 {
 	return KeyBind;
 }
@@ -109,7 +109,7 @@ void MountWheel::SetDismountKeyBind(const KeySequence& keybind)
 	DismountKeyBind = keybind;
 }
 
-KeySequence& MountWheel::GetDismountKeyBind()
+const KeySequence& MountWheel::GetDismountKeyBind()
 {
 	return DismountKeyBind;
 }
@@ -119,7 +119,7 @@ void MountWheel::SetDismountSignature(const std::string signature)
 	DismountSignature = signature;
 }
 
-std::string MountWheel::GetDismountSignature()
+const std::string MountWheel::GetDismountSignature()
 {
 	return DismountSignature;
 }
@@ -248,9 +248,6 @@ bool MountWheel::ProcessInputEvents(UINT msg, WPARAM wParam, LPARAM lParam)
 
 	switch (msg)
 	{
-	case WM_KILLFOCUS:
-		Hide();
-		break;
 	case WM_MOUSEMOVE:
 		MousePos.x = (signed short)(lParam);
 		MousePos.y = (signed short)(lParam >> 16);
@@ -307,7 +304,7 @@ bool MountWheel::ProcessInputEvents(UINT msg, WPARAM wParam, LPARAM lParam)
 			KeySequence mount_keybind;
 			if (MountList->GetMountKeyBind(CurrentMountHovered, mount_keybind))
 			{
-				SendKeybind(mount_keybind);
+				InputKeys::SendKeybind(mount_keybind);
 			}
 			bool left_mouse_bypass = CameraEnabled;
 			Hide();
@@ -619,7 +616,7 @@ void MountWheel::DetermineHoveredMount()
 		
 }
 
-std::string MountWheel::GetDismountSignatureFromScreenCapture()
+const std::string MountWheel::GetDismountSignatureFromScreenCapture()
 {
 	SIZE dismount_icon_size = {(LONG)DISMOUNT_ICON_WIDTH(ScreenSize.cx),
 							   (LONG)DISMOUNT_ICON_HEIGTH(ScreenSize.cy)};
@@ -664,7 +661,7 @@ std::string MountWheel::GetDismountSignatureFromScreenCapture()
 					icon_pixels += icon_data.Pitch;
 				}
 				screen_data->UnlockRect();
-#ifdef DEBUG				
+#ifdef _DEBUG				
 				IDirect3DTexture9 *icon_texture = NULL;
 				if (D3D_OK == Device->CreateTexture(dismount_icon_size.cx, dismount_icon_size.cy,
 												    1, 0, surface_info.Format, D3DPOOL_SYSTEMMEM, 
@@ -691,7 +688,7 @@ std::string MountWheel::GetDismountSignatureFromScreenCapture()
 					if (NULL != texture_data) texture_data->Release();
 				}
 				if (NULL != icon_texture) icon_texture->Release();
-#endif /* DEBUG */
+#endif /* _DEBUG */
 			}
 		}
 		if (NULL != screen_data) screen_data->Release();

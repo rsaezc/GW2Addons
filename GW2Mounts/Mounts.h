@@ -21,7 +21,7 @@ public:
 	Mounts();
 	~Mounts();
 
-	const char * GetMountName(Mounts::Mount mount);
+	const char* GetMountName(Mounts::Mount mount);
 
 	void SetFavoriteMount(Mounts::Mount mount);
 	Mounts::Mount GetFavoriteMount();
