@@ -36,6 +36,8 @@ public:
 
 	void EnableDismountCalibration(bool enable);
 	bool IsDismountCalibrationEnabled();
+	void SetDismountIconPos(POINT position);
+	POINT GetDismountIconPos();
 
 	void SetScreenSize(uint width, uint height);
 
@@ -61,6 +63,7 @@ private:
 	float WheelScale = 1.f;
 	bool ActionModeEnabled = false;
 	bool DismountCalibration = false;
+	POINT DismountIconPos = { 0, 0 };	
 
 	SIZE ScreenSize = { 0, 0 };
 	D3DXVECTOR2 WheelPosition;

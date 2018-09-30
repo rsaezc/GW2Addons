@@ -463,11 +463,16 @@ void ConfigurationWindow::LoadConfiguration()
 	float wheel_scale = WheelWindow->GetWheelScale();
 	wheel_scale = (float)ConfigIniHandler.GetDoubleValue("General", "mount_wheel_scale", wheel_scale);
 	WheelWindow->SetWheelScale(wheel_scale);
-	const char* dismount_signature = ConfigIniHandler.GetValue("General", "dismount_signature", nullptr);
+	const char* dismount_signature = ConfigIniHandler.GetValue("Dismount_Calibration", "icon_signature", nullptr);
 	if (dismount_signature)
 	{
 		WheelWindow->SetDismountSignature(std::string(dismount_signature));
 	}
+	POINT dismount_icon_pos = WheelWindow->GetDismountIconPos();
+	dismount_icon_pos.x = ConfigIniHandler.GetLongValue("Dismount_Calibration", "icon_position_x", dismount_icon_pos.x);
+	dismount_icon_pos.y = ConfigIniHandler.GetLongValue("Dismount_Calibration", "icon_position_y", dismount_icon_pos.y);
+	WheelWindow->SetDismountIconPos(dismount_icon_pos);
+	
 
 	KeySequence keybind = KeyBind;
 	const char* config_keybind = ConfigIniHandler.GetValue("Keybinds", "configuration_window", nullptr);
@@ -651,7 +656,10 @@ void ConfigurationWindow::UpdateDismountCalibration(bool enable)
 	WheelWindow->EnableDismountCalibration(enable);
 	if (!enable)
 	{
-		ConfigIniHandler.SetValue("General", "dismount_signature", WheelWindow->GetDismountSignature().c_str());
+		ConfigIniHandler.SetValue("Dismount_Calibration", "icon_signature", WheelWindow->GetDismountSignature().c_str());
+		POINT dismount_icon_pos = WheelWindow->GetDismountIconPos();
+		ConfigIniHandler.SetLongValue("Dismount_Calibration", "icon_position_x", dismount_icon_pos.x);
+		ConfigIniHandler.SetLongValue("Dismount_Calibration", "icon_position_y", dismount_icon_pos.y);
 		ConfigIniHandler.SaveFile(ConfigIniLocation);
 	}
 }

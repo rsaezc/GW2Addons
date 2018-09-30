@@ -26,10 +26,8 @@
 #define TEX_CURSOR_WIDTH		(32.0f/REF_SCREEN_WIDTH)
 #define TEX_CURSOR_HEIGHT		(32.0f/REF_SCREEN_HEIGHT)
 
-#define DISMOUNT_ICON_POS_X(SCREEN_WIDTH)		((SCREEN_WIDTH) * 1319.0f/REF_SCREEN_WIDTH)
-#define DISMOUNT_ICON_POS_Y(SCREEN_HEIGTH)		((SCREEN_HEIGTH) * 997.0f/REF_SCREEN_HEIGHT)
-#define DISMOUNT_ICON_WIDTH(SCREEN_WIDTH)		((SCREEN_WIDTH) * 46.0f/REF_SCREEN_WIDTH)
-#define DISMOUNT_ICON_HEIGTH(SCREEN_HEIGTH)		((SCREEN_HEIGTH) * 34.0f/REF_SCREEN_HEIGHT)
+#define DISMOUNT_ICON_WIDTH(SCREEN_WIDTH)		((SCREEN_WIDTH) * 40.0f/REF_SCREEN_WIDTH)
+#define DISMOUNT_ICON_HEIGTH(SCREEN_HEIGTH)		((SCREEN_HEIGTH) * 30.0f/REF_SCREEN_HEIGHT)
 
 #define D3D_SURFACE_FORMAT_LEN	(4U)
 
@@ -69,6 +67,7 @@ void MountWheel::Show()
 			}
 			else
 			{
+				(void)GetCursorPos(&DismountIconPos);
 				DismountSignature = GetDismountSignatureFromScreenCapture();
 			}
 		}
@@ -153,6 +152,16 @@ void MountWheel::EnableDismountCalibration(bool enable)
 bool MountWheel::IsDismountCalibrationEnabled()
 {
 	return DismountCalibration;
+}
+
+void MountWheel::SetDismountIconPos(POINT position)
+{
+	DismountIconPos = position;
+}
+
+POINT MountWheel::GetDismountIconPos()
+{
+	return DismountIconPos;
 }
 
 void MountWheel::SetScreenSize(uint width, uint height)
@@ -612,8 +621,6 @@ void MountWheel::DetermineHoveredMount()
 
 std::string MountWheel::GetDismountSignatureFromScreenCapture()
 {
-	POINT dismount_icon_pos = {(LONG)DISMOUNT_ICON_POS_X(ScreenSize.cx),
-							   (LONG)DISMOUNT_ICON_POS_Y(ScreenSize.cy)};
 	SIZE dismount_icon_size = {(LONG)DISMOUNT_ICON_WIDTH(ScreenSize.cx),
 							   (LONG)DISMOUNT_ICON_HEIGTH(ScreenSize.cy)};
 	BYTE *dismount_icon_data = new BYTE[D3D_SURFACE_FORMAT_LEN *
@@ -641,8 +648,8 @@ std::string MountWheel::GetDismountSignatureFromScreenCapture()
 			if (D3D_OK == Device->GetRenderTargetData(back_buffer, screen_data))
 			{
 				RECT capture_rect;
-				capture_rect.top = dismount_icon_pos.y;
-				capture_rect.left = dismount_icon_pos.x;
+				capture_rect.top = DismountIconPos.y;
+				capture_rect.left = DismountIconPos.x;
 				capture_rect.bottom = capture_rect.top + dismount_icon_size.cy;
 				capture_rect.right = capture_rect.left +  dismount_icon_size.cx;
 
