@@ -45,12 +45,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)imgui\;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(ProjectDir)beaengine\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third_party\imgui\;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(ProjectDir)src\;$(ProjectDir)src\utils\;$(ProjectDir)src\direct3d\;$(ProjectDir)src\imgui_extension\;$(ProjectDir)resources\;$(ProjectDir)third_party\;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)imgui\;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(ProjectDir)beaengine\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third_party\imgui\;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(ProjectDir)src\;$(ProjectDir)src\utils\;$(ProjectDir)src\direct3d\;$(ProjectDir)src\imgui_extension\;$(ProjectDir)resources\;$(ProjectDir)third_party\;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -66,13 +66,17 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>main.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>src\main.def</ModuleDefinitionFile>
       <AdditionalDependencies>d3dx9.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y $(TargetPath) "D:\Guild Wars 2\bin64\d3d9_chainload.dll"
 copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
     </PostBuildEvent>
+    <FxCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\utils\</AdditionalIncludeDirectories>
+      <ObjectFileOutput>$(ProjectDir)src\direct3d\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -91,83 +95,85 @@ copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</C
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>main.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>src\main.def</ModuleDefinitionFile>
       <AdditionalDependencies>d3dx9.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y $(TargetPath) "D:\Guild Wars 2\bin64\d3d9_chainload.dll"
 copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
     </PostBuildEvent>
+    <FxCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\utils\</AdditionalIncludeDirectories>
+      <ObjectFileOutput>$(ProjectDir)src\direct3d\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ConfigurationWindow.cpp" />
-    <ClCompile Include="d3dhooks.cpp" />
-    <ClCompile Include="EffectProgressTimer.cpp" />
-    <ClCompile Include="imgui\examples\imgui_impl_dx9.cpp" />
-    <ClCompile Include="imgui\examples\imgui_impl_win32.cpp" />
-    <ClCompile Include="imgui_ext.cpp" />
-    <ClCompile Include="InputKeys.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="imgui\imgui.cpp" />
-    <ClCompile Include="imgui\imgui_demo.cpp" />
-    <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="Mounts.cpp" />
-    <ClCompile Include="MountWheel.cpp" />
-    <ClCompile Include="UnitQuad.cpp" />
-    <ClCompile Include="Utility.cpp" />
-    <ClCompile Include="vftable.c" />
-    <ClCompile Include="xxhash\xxhash.c" />
+    <ClCompile Include="src\ConfigurationWindow.cpp" />
+    <ClCompile Include="src\direct3d\d3dhooks.cpp" />
+    <ClCompile Include="src\EffectProgressTimer.cpp" />
+    <ClCompile Include="third_party\imgui\examples\imgui_impl_dx9.cpp" />
+    <ClCompile Include="third_party\imgui\examples\imgui_impl_win32.cpp" />
+    <ClCompile Include="src\imgui_extension\imgui_ext.cpp" />
+    <ClCompile Include="src\InputKeys.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="third_party\imgui\imgui.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_demo.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\Mounts.cpp" />
+    <ClCompile Include="src\MountWheel.cpp" />
+    <ClCompile Include="src\direct3d\UnitQuad.cpp" />
+    <ClCompile Include="src\utils\utility.cpp" />
+    <ClCompile Include="src\direct3d\vftable.c" />
+    <ClCompile Include="third_party\xxhash\xxhash.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ConfigurationWindow.h" />
-    <ClInclude Include="custom_types.h" />
-    <ClInclude Include="EffectProgressTimer.h" />
-    <ClInclude Include="imgui\examples\imgui_impl_dx9.h" />
-    <ClInclude Include="imgui\examples\imgui_impl_win32.h" />
-    <ClInclude Include="imgui\imconfig.h" />
-    <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\imgui_internal.h" />
-    <ClInclude Include="imgui\stb_rect_pack.h" />
-    <ClInclude Include="imgui\stb_textedit.h" />
-    <ClInclude Include="imgui\stb_truetype.h" />
-    <ClInclude Include="imgui_ext.h" />
-    <ClInclude Include="InputKeys.h" />
-    <ClInclude Include="main.h" />
-    <ClInclude Include="Mounts.h" />
-    <ClInclude Include="MountWheel.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="UnitQuad.h" />
-    <ClInclude Include="simpleini\SimpleIni.h" />
-    <ClInclude Include="Utility.h" />
-    <ClInclude Include="vftable.h" />
-    <ClInclude Include="xxhash\xxhash.h" />
+    <ClInclude Include="src\ConfigurationWindow.h" />
+    <ClInclude Include="src\custom_types.h" />
+    <ClInclude Include="src\EffectProgressTimer.h" />
+    <ClInclude Include="third_party\imgui\examples\imgui_impl_dx9.h" />
+    <ClInclude Include="third_party\imgui\examples\imgui_impl_win32.h" />
+    <ClInclude Include="third_party\imgui\imconfig.h" />
+    <ClInclude Include="third_party\imgui\imgui.h" />
+    <ClInclude Include="third_party\imgui\imgui_internal.h" />
+    <ClInclude Include="third_party\imgui\stb_rect_pack.h" />
+    <ClInclude Include="third_party\imgui\stb_textedit.h" />
+    <ClInclude Include="third_party\imgui\stb_truetype.h" />
+    <ClInclude Include="src\imgui_extension\imgui_ext.h" />
+    <ClInclude Include="src\InputKeys.h" />
+    <ClInclude Include="src\main.h" />
+    <ClInclude Include="src\Mounts.h" />
+    <ClInclude Include="src\MountWheel.h" />
+    <ClInclude Include="resources\resource.h" />
+    <ClInclude Include="src\direct3d\UnitQuad.h" />
+    <ClInclude Include="third_party\simpleini\SimpleIni.h" />
+    <ClInclude Include="src\utils\utility.h" />
+    <ClInclude Include="src\direct3d\vftable.h" />
+    <ClInclude Include="third_party\xxhash\xxhash.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="main.def" />
-    <None Include="rgb2hsl.fxh" />
-    <None Include="rt_rcdat.bin" />
-    <None Include="Shader.cso">
+    <None Include="src\main.def" />
+    <None Include="src\utils\rgb2hsl.fxh" />
+    <None Include="src\direct3d\rt_rcdat.bin" />
+    <None Include="src\direct3d\shader.cso">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="perlin.hlsl">
+    <ClInclude Include="src\direct3d\perlin.hlsl">
       <FileType>Document</FileType>
     </ClInclude>
-    <FxCompile Include="Shader.fx">
+    <FxCompile Include="src\direct3d\shader.fx">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">2.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">2.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resource.rc" />
+    <ResourceCompile Include="resources\resource.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="minhook\build\VC15\libMinHook.vcxproj">
+    <ProjectReference Include="third_party\minhook\build\VC15\libMinHook.vcxproj">
       <Project>{f142a341-5ee0-442d-a15f-98ae9b48dbae}</Project>
     </ProjectReference>
   </ItemGroup>

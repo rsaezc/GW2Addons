@@ -17,150 +17,150 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="imgui\imgui_demo.cpp">
+    <ClCompile Include="third_party\imgui\imgui_demo.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_draw.cpp">
+    <ClCompile Include="third_party\imgui\imgui_draw.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui.cpp">
+    <ClCompile Include="third_party\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UnitQuad.cpp">
+    <ClCompile Include="src\direct3d\UnitQuad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utility.cpp">
+    <ClCompile Include="src\utils\utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vftable.c">
+    <ClCompile Include="src\direct3d\vftable.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="d3dhooks.cpp">
+    <ClCompile Include="src\direct3d\d3dhooks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="xxhash\xxhash.c">
+    <ClCompile Include="third_party\xxhash\xxhash.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui_ext.cpp">
+    <ClCompile Include="src\imgui_extension\imgui_ext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\examples\imgui_impl_dx9.cpp">
+    <ClCompile Include="third_party\imgui\examples\imgui_impl_dx9.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\examples\imgui_impl_win32.cpp">
+    <ClCompile Include="third_party\imgui\examples\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="MountWheel.cpp">
+    <ClCompile Include="src\MountWheel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mounts.cpp">
+    <ClCompile Include="src\Mounts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConfigurationWindow.cpp">
+    <ClCompile Include="src\ConfigurationWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EffectProgressTimer.cpp">
+    <ClCompile Include="src\EffectProgressTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InputKeys.cpp">
+    <ClCompile Include="src\InputKeys.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="imgui\imgui_internal.h">
+    <ClInclude Include="third_party\imgui\imgui_internal.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\stb_rect_pack.h">
+    <ClInclude Include="third_party\imgui\stb_rect_pack.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\stb_textedit.h">
+    <ClInclude Include="third_party\imgui\stb_textedit.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\stb_truetype.h">
+    <ClInclude Include="third_party\imgui\stb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imconfig.h">
+    <ClInclude Include="third_party\imgui\imconfig.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui.h">
+    <ClInclude Include="third_party\imgui\imgui.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="simpleini\SimpleIni.h">
+    <ClInclude Include="third_party\simpleini\SimpleIni.h">
       <Filter>simpleini</Filter>
     </ClInclude>
-    <ClInclude Include="main.h">
+    <ClInclude Include="src\main.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnitQuad.h">
+    <ClInclude Include="src\direct3d\UnitQuad.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utility.h">
+    <ClInclude Include="src\utils\utility.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="resources\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="vftable.h">
+    <ClInclude Include="src\direct3d\vftable.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="xxhash\xxhash.h">
+    <ClInclude Include="third_party\xxhash\xxhash.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui_ext.h">
+    <ClInclude Include="src\imgui_extension\imgui_ext.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="perlin.hlsl">
+    <ClInclude Include="src\direct3d\perlin.hlsl">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\examples\imgui_impl_dx9.h">
+    <ClInclude Include="third_party\imgui\examples\imgui_impl_dx9.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\examples\imgui_impl_win32.h">
+    <ClInclude Include="third_party\imgui\examples\imgui_impl_win32.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ConfigurationWindow.h">
+    <ClInclude Include="src\ConfigurationWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mounts.h">
+    <ClInclude Include="src\Mounts.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="MountWheel.h">
+    <ClInclude Include="src\MountWheel.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="EffectProgressTimer.h">
+    <ClInclude Include="src\EffectProgressTimer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="custom_types.h">
+    <ClInclude Include="src\custom_types.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="InputKeys.h">
+    <ClInclude Include="src\InputKeys.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="main.def">
+    <None Include="src\main.def">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="rt_rcdat.bin">
+    <None Include="src\direct3d\rt_rcdat.bin">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Shader.cso">
+    <None Include="src\direct3d\shader.cso">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="rgb2hsl.fxh">
+    <None Include="src\utils\rgb2hsl.fxh">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shader.fx">
+    <FxCompile Include="src\direct3d\shader.fx">
       <Filter>Source Files</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resource.rc">
+    <ResourceCompile Include="resources\resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
