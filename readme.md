@@ -1,6 +1,12 @@
 # GW2Mount Overlay
 
 A radial GW2-style overlay to select your mounts. Currently, it is compatible with mounts included until *Living World Season 4: Long Live the Lich*.
+```diff
+- This overlay is a fan-made GW2 addon. Arenanet does not allow addons officially but overlays and other harmless addons have been tolerated over the years. However, this can change at any time. The use of GW2MountOverlay is at your own risk.
+```
+**Disclaimer:** 
+The art used in this overlay is the sole property of [Arenanet](https://www.arena.net/).
+Mount logos have been borrowed from [GW2Addons](https://github.com/Friendly0Fire/GW2Addons).
 
 ## Installation
 - Download the file ``GW2MountOverlay.zip`` from [the latest release](https://github.com/rsaezc/GW2MountOverlay/releases/latest).
@@ -11,23 +17,25 @@ A radial GW2-style overlay to select your mounts. Currently, it is compatible wi
 - Open the game option window, move to the control options tab and set the in-game keybind for each mount.
 - Press ``Shift+Alt+M`` for displaying the overlay configuration window.
 - Set a keybind for the configuration window. You can skip this step.
-- Set a keybind for the GW2Mount Overlay.
+- Set a keybind for the GW2Mount overlay.
 - Set the keybind for each mount. Make sure the overlay mount keybind matches the in-game keybind. ![Keybinds](https://raw.githubusercontent.com/rsaezc/GW2MountOverlay/assets/keybinds.png)
 - Set your favorite mount. You can skip this step.
 -- The favorite mount is selected when you have not selected any other mount, so you can mount in your favorite mount quickly opening the overlay and clicking anywhere on the screen.
 - Close the configuration window and open the GW2Mount overlay pressing the overlay keybind. Then, you should see the radial GW2-style overlay with the default size. You can adjust the overlay size in the configuration window.
-- The GW2Mount overlay is ready but What happens if you use the overlay while you character is mounting? Oops! After selecting a mount, your character dismounts and does not mount again. Do you like this behaviour? OK, all done!, enjoy the overlay. No? Don't worry, use the dismount feature.
+- The GW2Mount overlay is ready but What happens if you use the overlay while your character is mounting? Oops! After selecting a mount, your character dismounts and does not mount again. Do you like this behaviour? OK, all done!, enjoy the overlay. No? Don't worry, use the dismount feature.
 
 ## Dismount feature
 GW2MountOverlay can dismount for you when you open the overlay. In this way, you can change your mount quickly even when your character is mounting.
-This feature is based on a very basic image recognition. GW2MountOverlay gets an in-game capture and recognizes the dismount icon in your skill bar. Unfortunately, the size and position of dismount icon changes depending on screen size. Hence, GW2MountOverlay needs your help to work properly.
+This feature is based on a very basic image recognition. GW2MountOverlay gets an in-game capture and recognizes the dismount icon in your skill bar. Unfortunately, the size and position of dismount icon change depending on screen size. Hence, GW2MountOverlay needs your help to work properly.
 - Open the overlay configuration window.
 - Check the dismount calibration checkbox.
-- Close the overlay configuration window and mount (you can use the overlay if you wish).
-- Move the mouse cursor to the left-top corner of the dismount icon. Ensure that the dismount icon does not light up. ![Dismount calibration](https://raw.githubusercontent.com/rsaezc/GW2MountOverlay/assets/dismount_calibration.png)
-- Open the GW2Mount overlay and close it (you can select a mount or use the ESC key).
-- Open the overlay configuration window again and uncheck the dismount calibration checkbox.
+- Close the overlay configuration window and mount (using the in-game keybind not the overlay).
+- Move the mouse cursor to the left-top corner of the dismount icon.
+- Open the GW2Mount overlay and close it using the ESC key.
+- Move the mouse cursor away from the dismount icon and open the overlay again. Then, close the overlay using the ESC key. ![Dismount calibration](https://raw.githubusercontent.com/rsaezc/GW2MountOverlay/assets/dismount_calibration.png)
+- Open the overlay configuration window and uncheck the dismount calibration checkbox.
 - That's all. Open the overlay, select a mount, open the overlay again and your character should dismount.
+	- Note that the calibration must be repeated each time the screen size is changed.
 
 ## Credits
 This project is a fork from [GW2Addons](https://github.com/Friendly0Fire/GW2Addons). GW2MountOverlay would not have been possible without the hard work of [Friendly0Fire](https://github.com/Friendly0Fire) and his contributors.

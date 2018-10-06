@@ -64,6 +64,7 @@ private:
 	float WheelScale = 1.f;
 	bool ActionModeEnabled = false;
 	bool DismountCalibration = false;
+	bool DismountIconPosCalibrated = false;
 	POINT DismountIconPos = { 0, 0 };	
 
 	SIZE ScreenSize = { 0, 0 };
