@@ -1,12 +1,12 @@
-[submodule "GW2Mounts/imgui"]
+[submodule "GW2MountOverlay/third_party/imgui"]
 	path = GW2MountOverlay/third_party/imgui
 	url = https://github.com/Friendly0Fire/imgui.git
-[submodule "GW2Mounts/simpleini"]
+[submodule "GW2MountOverlay/third_party/simpleini"]
 	path = GW2MountOverlay/third_party/simpleini
 	url = https://github.com/brofield/simpleini.git
-[submodule "GW2Mounts/minhook"]
+[submodule "GW2MountOverlay/third_party/minhook"]
 	path = GW2MountOverlay/third_party/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
-[submodule "GW2Mounts/xxhash"]
+[submodule "GW2MountOverlay/third_party/xxhash"]
 	path = GW2MountOverlay/third_party/xxhash
 	url = https://github.com/Cyan4973/xxHash.git

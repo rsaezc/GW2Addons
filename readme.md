@@ -1,8 +1,10 @@
-# GW2Mount Overlay
+# GW2MountOverlay
 
 A radial GW2-style overlay to select your mounts. Currently, it is compatible with mounts included until *Living World Season 4: Long Live the Lich*.
 ```diff
-- This overlay is a fan-made GW2 addon. Arenanet does not allow addons officially but overlays and other harmless addons have been tolerated over the years. However, this can change at any time. The use of GW2MountOverlay is at your own risk.
+- This overlay is a fan-made GW2 addon. 
+- Arenanet does not allow addons officially but overlays and other harmless addons have been tolerated over the years. 
+- However, this can change at any time. The use of GW2MountOverlay is at your own risk.
 ```
 **Disclaimer:** 
 The art used in this overlay is the sole property of [Arenanet](https://www.arena.net/).
@@ -17,12 +19,12 @@ Mount logos have been borrowed from [GW2Addons](https://github.com/Friendly0Fire
 - Open the game option window, move to the control options tab and set the in-game keybind for each mount.
 - Press ``Shift+Alt+M`` for displaying the overlay configuration window.
 - Set a keybind for the configuration window. You can skip this step.
-- Set a keybind for the GW2Mount overlay.
+- Set a keybind for the GW2MountOverlay.
 - Set the keybind for each mount. Make sure the overlay mount keybind matches the in-game keybind. ![Keybinds](https://raw.githubusercontent.com/rsaezc/GW2MountOverlay/assets/keybinds.png)
 - Set your favorite mount. You can skip this step.
--- The favorite mount is selected when you have not selected any other mount, so you can mount in your favorite mount quickly opening the overlay and clicking anywhere on the screen.
-- Close the configuration window and open the GW2Mount overlay pressing the overlay keybind. Then, you should see the radial GW2-style overlay with the default size. You can adjust the overlay size in the configuration window.
-- The GW2Mount overlay is ready but What happens if you use the overlay while your character is mounting? Oops! After selecting a mount, your character dismounts and does not mount again. Do you like this behaviour? OK, all done!, enjoy the overlay. No? Don't worry, use the dismount feature.
+  - The favorite mount is selected when you have not selected any other mount, so you can mount in your favorite mount quickly opening the overlay and clicking anywhere on the screen.
+- Close the configuration window and open the GW2MountOverlay pressing the overlay keybind. Then, you should see the radial GW2-style overlay with the default size. You can adjust the overlay size in the configuration window.
+- The GW2MountOverlay is ready but What happens if you use the overlay while your character is mounting? Oops! After selecting a mount, your character dismounts and does not mount again. Do you like this behaviour? OK, all done!, enjoy the overlay. No? Don't worry, use the dismount feature.
 
 ## Dismount feature
 GW2MountOverlay can dismount for you when you open the overlay. In this way, you can change your mount quickly even when your character is mounting.
@@ -31,7 +33,7 @@ This feature is based on a very basic image recognition. GW2MountOverlay gets an
 - Check the dismount calibration checkbox.
 - Close the overlay configuration window and mount (using the in-game keybind not the overlay).
 - Move the mouse cursor to the left-top corner of the dismount icon.
-- Open the GW2Mount overlay and close it using the ESC key.
+- Open the GW2MountOverlay and close it using the ESC key.
 - Move the mouse cursor away from the dismount icon and open the overlay again. Then, close the overlay using the ESC key. ![Dismount calibration](https://raw.githubusercontent.com/rsaezc/GW2MountOverlay/assets/dismount_calibration.png)
 - Open the overlay configuration window and uncheck the dismount calibration checkbox.
 - That's all. Open the overlay, select a mount, open the overlay again and your character should dismount.
@@ -60,7 +62,7 @@ A: You have two options: either the other thing you want to run supports *chainl
 
 The most common use case would be combining ArcDPS, GW2Hook and this. For this instance, I heavily recommend setting things up as follows:
 - ArcDPS is named ``d3d9.dll``.
-- GW2Mounts is named ``d3d9_chainload.dll``.
+- GW2MountOverlay is named ``d3d9_chainload.dll``.
 - GW2Hook is named ``ReShade64.dll``.
 
 *N.B. If your Windows options hide file extensions (which is the default, you can confirm by looking at whether the game's file name is "Gw2-64.exe" or just "Gw2-64") leave out the ".dll" part of the file names (i.e. use "d3d9", "d3d9_chainload" and "ReShade64" respectively).
