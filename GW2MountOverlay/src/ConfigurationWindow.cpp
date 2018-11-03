@@ -440,11 +440,10 @@ void ConfigurationWindow::Hide()
 void ConfigurationWindow::LoadConfiguration()
 {
 	// Create folders
-	TCHAR exeFullPath[MAX_PATH];
-	GetModuleFileName(0, exeFullPath, MAX_PATH);
-	tstring exeFolder;
-	SplitFilename(exeFullPath, &exeFolder, nullptr);
-	ConfigIniFolder = exeFolder + TEXT("\\addons\\mounts\\");
+	TCHAR user_personal_path[MAX_PATH];
+	SHGetFolderPath(0, CSIDL_PERSONAL, GetCurrentProcessToken(), SHGFP_TYPE_CURRENT, user_personal_path);	
+	tstring config_path = user_personal_path;
+	ConfigIniFolder = config_path + TEXT("\\Guild Wars 2\\Addons\\GW2MountOverlay\\");
 	_tcscpy_s(ConfigIniLocation, (ConfigIniFolder + ConfigName).c_str());
 #if _UNICODE
 	strcpy_s(ImGuiConfigIniLocation, ws2s(ConfigIniFolder + ImGuiConfigName).c_str());

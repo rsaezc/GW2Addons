@@ -70,8 +70,8 @@
       <AdditionalDependencies>d3dx9.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(TargetPath) "D:\Guild Wars 2\bin64\d3d9_chainload.dll"
-copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
+      <Command>copy /Y "$(TargetPath)" "D:\Guild Wars 2\bin64\d3d9_chainload.dll"
+copy /Y "$(OutDir)$(TargetName).pdb" "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
     </PostBuildEvent>
     <FxCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)src\utils\</AdditionalIncludeDirectories>
@@ -99,8 +99,8 @@ copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</C
       <AdditionalDependencies>d3dx9.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(TargetPath) "D:\Guild Wars 2\bin64\d3d9_chainload.dll"
-copy /Y $(OutDir)$(TargetName).pdb "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
+      <Command>copy /Y "$(TargetPath)" "D:\Guild Wars 2\bin64\d3d9_chainload.dll"
+copy /Y "$(OutDir)$(TargetName).pdb" "D:\Guild Wars 2\bin64\d3d9_chainload.pdb"</Command>
     </PostBuildEvent>
     <FxCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)src\utils\</AdditionalIncludeDirectories>

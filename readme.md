@@ -71,9 +71,11 @@ This should allow all addons to load properly. Note that there is special code p
 
 Finally, note that combining addons is largely unsupported.
 
-### Q: I'm having a crash on launch mentioning "Coherent DLL", what do?
+### Q: I'm having a crash on launch related to a .dll file, What can I do?
 
-A: There seems to be a lot of potential reasons for this particular crash. [BGDM's website](http://gw2bgdm.blogspot.com/p/faq.html#2.5) lists quite a few. I'd especially recommend making sure you have the very latest [VC++ Redist](https://go.microsoft.com/fwlink/?LinkId=746572).
+A: There seems to be a lot of potential reasons for this crash. I'd recommend installing the latest [VC++ Redist](https://go.microsoft.com/fwlink/?LinkId=746572).
+
+For crashes related to d3d9 and d3dx9 .dll files, install the [DirectX End-User Runtimes](https://www.microsoft.com/en-us/download/details.aspx?id=7087).
 
 ### Q: I'm having problems with the overlay, Can I contact you?
 

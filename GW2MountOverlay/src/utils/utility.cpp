@@ -64,13 +64,6 @@ std::string GetKeyName(unsigned int virtualKey)
 		return "[Error]";
 }
 
-void SplitFilename(const tstring& str, tstring* folder, tstring* file)
-{
-	size_t found = str.find_last_of(TEXT("/\\"));
-	if (folder) *folder = str.substr(0, found);
-	if (file) *file = str.substr(found + 1);
-}
-
 mstime timeInMS()
 {
 	mstime iCount;
